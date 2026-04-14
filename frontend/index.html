@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Security Posture Tool</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d1117;color:#e6edf3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;height:100vh;overflow:hidden}
+#left{flex:0 0 60%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+h1{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#7d8590;margin-bottom:16px}
+.seg{transition:opacity .15s;stroke:#0d1117;stroke-width:1.5px;cursor:pointer}
+.seg:hover{opacity:.72}
+.seg.sel{stroke:#fff;stroke-width:2.5px}
+.rl{fill:rgba(255,255,255,.45);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;pointer-events:none}
+.cl{fill:rgba(255,255,255,.82);font-size:8px;pointer-events:none;text-anchor:middle}
+#leg{display:flex;gap:18px;margin-top:16px;font-size:11px;color:#7d8590}
+.ld{display:flex;align-items:center;gap:6px}
+.ldot{width:9px;height:9px;border-radius:50%}
+#right{flex:1;display:flex;flex-direction:column;border-left:1px solid #21262d;overflow:hidden}
+#det{padding:20px 24px;border-bottom:1px solid #21262d;min-height:195px}
+#det h2{font-size:15px;margin-bottom:6px}
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:12px;margin-bottom:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.sbar{height:5px;border-radius:3px;background:#21262d;margin:8px 0 3px}
+.sbf{height:100%;border-radius:3px;transition:width .4s ease}
+.sl{font-size:11px;color:#7d8590}
+.ctag{display:inline-block;background:#161b22;border:1px solid #30363d;border-radius:4px;font-size:11px;padding:2px 8px;margin:6px 4px 0 0;color:#7d8590}
+.fi{margin-top:10px;font-size:12px;color:#8b949e;line-height:1.7}
+.fi span{display:block;padding:1px 0}
+.fi span.ok::before{content:"v ";color:#3fb950}
+.fi span.bad::before{content:"x ";color:#f85149}
+#ph{color:#7d8590;font-size:13px;padding-top:60px;text-align:center}
+#chat{flex:1;display:flex;flex-direction:column;overflow:hidden}
+#ch{padding:11px 24px;font-size:11px;font-weight:700;color:#7d8590;letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:8px}
+.adot{width:7px;height:7px;border-radius:50%;background:#3fb950;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+#msgs{flex:1;overflow-y:auto;padding:14px 24px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:92%;font-size:12.5px;line-height:1.65;padding:9px 13px;border-radius:10px}
+.msg.u{align-self:flex-end;background:#1f6feb;color:#fff;border-bottom-right-radius:2px}
+.msg.ai{align-self:flex-start;background:#161b22;border:1px solid #21262d;color:#e6edf3;border-bottom-left-radius:2px}
+.msg .src{margin-top:5px;font-size:10px;color:#7d8590}
+#sugg{padding:0 24px 10px;display:flex;flex-wrap:wrap;gap:5px}
+.sq{background:#161b22;border:1px solid #30363d;border-radius:14px;color:#8b949e;font-size:11px;padding:3px 11px;cursor:pointer;transition:border-color .15s,color .15s}
+.sq:hover{border-color:#388bfd;color:#e6edf3}
+#ir{display:flex;gap:8px;padding:10px 24px 14px;border-top:1px solid #21262d}
+#ci{flex:1;background:#161b22;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:13px;padding:7px 12px;outline:none;transition:border-color .15s}
+#ci:focus{border-color:#388bfd}
+#ci::placeholder{color:#484f58}
+#sb{background:#238636;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;padding:7px 16px;cursor:pointer}
+#sb:hover{background:#2ea043}
+</style>
+</head>
+<body>
+<div id="left">
+<h1>Defense in Depth -- Security Posture</h1>
+<svg id="svg"></svg>
+<div id="leg">
+<div class="ld"><div class="ldot" style="background:#f85149"></div>Kritiek</div>
+<div class="ld"><div class="ldot" style="background:#d29922"></div>Aandacht</div>
+<div class="ld"><div class="ldot" style="background:#3fb950"></div>Voldoende</div>
+<div class="ld"><div class="ldot" style="background:#30363d"></div>Niet gemeten</div>
+</div>
+</div>
+<div id="right">
+<div id="det">
+<div id="ph">Klik op een control voor details en bewijs</div>
+<div id="dc" style="display:none"></div>
+</div>
+<div id="chat">
+<div id="ch"><div class="adot"></div>AI Security Analyst</div>
+<div id="msgs">
+<div class="msg ai">Hallo. Ik kan redeneren over jullie actuele security posture op basis van de gekoppelde data.<div class="src">Databronnen: NMAP (13 apr) - Entra ID (live) - Firewall logs (12 apr)</div></div>
+</div>
+<div id="sugg">
+<button class="sq" onclick="ask('RDP aanval vanaf internet mogelijk?')">RDP aanval mogelijk?</button>
+<button class="sq" onclick="ask('Assume breach endpoint - hoe ver komt aanvaller?')">Assume breach endpoint</button>
+<button class="sq" onclick="ask('Welke accounts hebben Domain Admin rechten?')">Domain Admin accounts</button>
+<button class="sq" onclick="ask('Wat zijn onze drie grootste risicos?')">Top 3 risicos</button>
+</div>
+<div id="ir">
+<input id="ci" placeholder="Stel een vraag over jullie security posture..."/>
+<button id="sb" onclick="send()">Verstuur</button>
+</div>
+</div>
+</div>
+<script>
+const L=[
+{id:"core",label:"Kroonjuwelen",color:"#8957e5",r:[0,52]},
+{id:"data",label:"Data",color:"#1f6feb",r:[56,106]},
+{id:"application",label:"Applicatie",color:"#388bfd",r:[110,165]},
+{id:"endpoint",label:"Endpoint",color:"#d29922",r:[169,224]},
+{id:"network",label:"Netwerk",color:"#f0883e",r:[228,283]},
+{id:"perimeter",label:"Perimeter",color:"#f85149",r:[287,345]},
+];
+const C=[
+{id:"fw",layer:"perimeter",label:"Firewall Regels",score:.35,status:"red",conn:"firewall_logs",bad:["43 any-any regels actief","Poort 3389 inbound niet geblokkeerd","Ruleset 6 jaar niet gereviewd"],ok:[]},
+{id:"dns",layer:"perimeter",label:"DNS Filtering",score:.70,status:"green",conn:"dns_logs",bad:[],ok:["C2-blokkade actief","DGA-detectie aan"]},
+{id:"em",layer:"perimeter",label:"E-mail Gateway",score:.65,status:"orange",conn:"email_logs",bad:["SPF ontbreekt op 2 domeinen","Geen DMARC enforcement"],ok:["Sandboxing actief"]},
+{id:"wp",layer:"perimeter",label:"Web Proxy",score:.80,status:"green",conn:"proxy_logs",bad:[],ok:["HTTPS-inspectie actief","URL-categorisatie aan"]},
+{id:"vpn",layer:"perimeter",label:"VPN + MFA",score:.55,status:"orange",conn:"entra_id",bad:["12% VPN zonder MFA","Split tunneling op 34 devices"],ok:["Conditional Access actief"]},
+{id:"dd",layer:"perimeter",label:"DDoS",score:null,status:"none",conn:null,bad:[],ok:[]},
+{id:"seg",layer:"network",label:"Segmentatie",score:.30,status:"red",conn:"firewall_logs",bad:["SMB werkplek-server niet geblokkeerd","OT niet gesegmenteerd","Geen oost-west filtering"],ok:[]},
+{id:"nac",layer:"network",label:"NAC 802.1X",score:.20,status:"red",conn:"nmap",bad:["Geen 802.1X op bekabeld netwerk","Onbeheerde devices op productie-VLAN"],ok:[]},
+{id:"idns",layer:"network",label:"Interne DNS",score:.60,status:"orange",conn:"dns_logs",bad:["DNS-tunneling niet gedetecteerd"],ok:["Split DNS geconfigureerd"]},
+{id:"smb",layer:"network",label:"SMB Signing",score:.50,status:"orange",conn:"nmap",bad:["SMB signing niet verplicht op 18 hosts"],ok:[]},
+{id:"jump",layer:"network",label:"Jump Server",score:.40,status:"red",conn:"entra_id",bad:["Direct RDP werkplek-server mogelijk","Geen PAW ingericht"],ok:[]},
+{id:"edr",layer:"endpoint",label:"EDR",score:.75,status:"green",conn:"edr_api",bad:["3 servers zonder EDR-agent"],ok:["Defender for Endpoint actief","Tamper protection aan"]},
+{id:"pat",layer:"endpoint",label:"Patching",score:.45,status:"orange",conn:"nmap",bad:["34 systemen >30 dagen zonder patch","6 EOL-systemen"],ok:["Intune patchbeleid actief"]},
+{id:"laps",layer:"endpoint",label:"LAPS",score:.30,status:"red",conn:"entra_id",bad:["LAPS niet op 68% van apparaten","Gedeeld lokaal adminwachtwoord"],ok:[]},
+{id:"bl",layer:"endpoint",label:"BitLocker",score:.85,status:"green",conn:"entra_id",bad:["12 apparaten zonder encryptie"],ok:["92% coverage werkplekken"]},
+{id:"asr",layer:"endpoint",label:"ASR Regels",score:.40,status:"red",conn:"edr_api",bad:["LSASS-bescherming niet actief","Office child-process blokkade uit"],ok:[]},
+{id:"ac",layer:"endpoint",label:"App Control",score:null,status:"none",conn:null,bad:[],ok:[]},
+{id:"mfa",layer:"application",label:"MFA Dekking",score:.62,status:"orange",conn:"entra_id",bad:["38% gebruikers zonder MFA","Service accounts uitgezonderd"],ok:["Conditional Access geconfigureerd"]},
+{id:"waf",layer:"application",label:"WAF",score:.70,status:"green",conn:"waf_logs",bad:["2 applicaties zonder WAF"],ok:["Azure WAF actief op hoofdapplicaties"]},
+{id:"vs",layer:"application",label:"Vuln. Scanning",score:.35,status:"red",conn:"nmap",bad:["Geen geautomatiseerde app-scan","Laatste pentest: 18 maanden geleden"],ok:[]},
+{id:"db",layer:"application",label:"Database Sec.",score:.50,status:"orange",conn:"db_logs",bad:["Geen database activity monitoring","BSN-kolommen niet versleuteld"],ok:["DB-accounts least privilege"]},
+{id:"enc",layer:"data",label:"Encryptie",score:.70,status:"green",conn:"entra_id",bad:["Storage-encryptie niet geverifieerd op 3 systemen"],ok:["BitLocker coverage hoog"]},
+{id:"dlp",layer:"data",label:"DLP",score:.45,status:"orange",conn:"dlp_logs",bad:["DLP alleen op e-mail (Zivver)","Geen endpoint DLP"],ok:["Zivver actief"]},
+{id:"bkp",layer:"data",label:"Backup & DR",score:.15,status:"red",conn:"backup_api",bad:["Geen immutable backups","DR nooit getest","RTO/RPO niet gedefinieerd"],ok:[]},
+{id:"cls",layer:"data",label:"Classificatie",score:.20,status:"red",conn:null,bad:["Geen classificatieschema actief","Sensitivity labels niet uitgerold"],ok:[]},
+{id:"iam",layer:"core",label:"IAM",score:.25,status:"red",conn:"entra_id",bad:["Geen IAM-eigenaar","Domain admin 6mnd na vertrek actief","Geen lifecycle-beheer"],ok:[]},
+{id:"pam",layer:"core",label:"PAM",score:.20,status:"red",conn:"entra_id",bad:["Geen PAM-tooling","Permanente Domain Admin accounts","Geen just-in-time access"],ok:[]},
+{id:"pki",layer:"core",label:"PKI ADCS",score:.30,status:"red",conn:"entra_id",bad:["ESC-kwetsbaarheden aanwezig (Outflank 2024)","Status quick wins onbekend"],ok:[]},
+];
+const SC={red:"#f85149",orange:"#d29922",green:"#3fb950",none:"#30363d"};
+const BC={perimeter:"#f85149",network:"#f0883e",endpoint:"#d29922",application:"#388bfd",data:"#1f6feb",core:"#8957e5"};
+const W=560,H=560,CX=W/2,CY=H/2;
+const svg=d3.select("#svg").attr("width",W).attr("height",H);
+L.forEach(l=>{
+  svg.append("circle").attr("cx",CX).attr("cy",CY).attr("r",l.r[1])
+    .attr("fill","none").attr("stroke",l.color).attr("stroke-width",l.r[1]-l.r[0]-2).attr("stroke-opacity",.07);
+});
+const bl={};L.forEach(l=>{bl[l.id]=C.filter(c=>c.layer===l.id);});
+L.forEach(layer=>{
+  const cs=bl[layer.id];if(!cs.length)return;
+  const iR=layer.r[0]+2,oR=layer.r[1]-2,gap=layer.id==="core"?0:.028;
+  const ap=(2*Math.PI)/cs.length;
+  cs.forEach((ctrl,i)=>{
+    const sa=i*ap+gap/2-Math.PI/2,ea=(i+1)*ap-gap/2-Math.PI/2;
+    const arc=d3.arc().innerRadius(iR).outerRadius(oR).startAngle(sa).endAngle(ea);
+    svg.append("path").datum(ctrl).attr("class","seg")
+      .attr("d",arc).attr("transform","translate("+CX+","+CY+")")
+      .attr("fill",SC[ctrl.status]).attr("fill-opacity",ctrl.status==="none"?.35:.72)
+      .on("click",(ev,d)=>show(d,ev.currentTarget));
+    if(oR-iR>26){
+      const mid=(sa+ea)/2,mr=(iR+oR)/2;
+      const lns=ctrl.label.split(" ");
+      lns.forEach((ln,li,arr)=>{
+        svg.append("text").attr("class","cl")
+          .attr("transform","translate("+(CX+mr*Math.cos(mid))+","+(CY+mr*Math.sin(mid)+(li-(arr.length-1)/2)*10)+")")
+          .text(ln);
+      });
+    }
+  });
+  svg.append("text").attr("class","rl")
+    .attr("transform","translate("+(CX+layer.r[1]+11)+","+CY+")")
+    .attr("dominant-baseline","middle").text(layer.label);
+});
+let se=null;
+function show(ctrl,el){
+  if(se)d3.select(se).classed("sel",false);
+  d3.select(el).classed("sel",true);se=el;
+  document.getElementById("ph").style.display="none";
+  const dc=document.getElementById("dc");dc.style.display="block";
+  const ln=L.find(l=>l.id===ctrl.layer)?.label??ctrl.layer;
+  const bc=BC[ctrl.layer],sc=ctrl.score??0;
+  const sl=ctrl.score===null?"Niet gemeten":ctrl.status==="red"?"Kritiek - "+Math.round(sc*100)+"%":ctrl.status==="orange"?"Aandacht - "+Math.round(sc*100)+"%":"Voldoende - "+Math.round(sc*100)+"%";
+  const cn=ctrl.conn?"<span class=\"ctag\">Connector: "+ctrl.conn.replace(/_/g," ")+"</span>":"<span class=\"ctag\">Geen connector gekoppeld</span>";
+  const fh=[...ctrl.bad.map(f=>"<span class=\"bad\">"+f+"</span>"),...ctrl.ok.map(f=>"<span class=\"ok\">"+f+"</span>")].join("")||"<span style=\"color:#484f58\">Koppel een databron om te meten</span>";
+  dc.innerHTML="<h2>"+ctrl.label+"</h2><span class=\"badge\" style=\"background:"+bc+"22;color:"+bc+"\">"+ln+"</span>"+cn+"<div class=\"sbar\"><div class=\"sbf\" style=\"width:"+sc*100+"%;background:"+SC[ctrl.status]+"\"></div></div><div class=\"sl\">"+sl+"</div><div class=\"fi\">"+fh+"</div>";
+}
+const ANS={
+  "RDP aanval vanaf internet mogelijk?":"Op basis van de firewalldata: <strong>ja, deels</strong>.<br><br>Firewall regel A-2847 staat inbound TCP 3389 toe vanuit twee externe IP-ranges. Gecombineerd met 34 systemen zonder recente patch is een RDP-aanval realistisch. NAC is niet actief - voet aan de grond geeft direct toegang tot het productienetwerk.",
+  "Assume breach endpoint - hoe ver komt aanvaller?":"Gebaseerd op actuele posture: <strong>tot Domain Admin in potentieel een stap</strong>.<br><br>1. LAPS niet op 68% apparaten - pass-the-hash mogelijk<br>2. SMB-signing niet verplicht op 18 hosts - relay-aanval mogelijk<br>3. ASR uitgeschakeld - LSASS dump mogelijk<br>4. Netwerk niet gesegmenteerd - laterale beweging ongehinderd<br>5. Domain Admin permanent actief - geen JIT<br><br>Consistent met Outflank-bevindingen mei 2024.",
+  "Welke accounts hebben Domain Admin rechten?":"Entra ID toont <strong>14 actieve Domain Admin accounts</strong>.<br><br>2 service accounts, 1 account medewerker uit dienst (laatste login 23 feb 2026), 4 externe leveranciers zonder verloopdatum, 7 beheerdersaccounts. Geen PAW. Alle permanent elevated.",
+  "Wat zijn onze drie grootste risicos?":"<strong>1. IAM/PAM</strong> - Geen PAM, permanente Domain Admin, LAPS niet uitgerold. Score: 20%<br><br><strong>2. Netwerksegmentatie</strong> - Geen oost-west filtering, OT niet gesegmenteerd. Score: 30%<br><br><strong>3. Backup & DR</strong> - Geen immutable backups, DR nooit getest. Score: 15%",
+};
+function ask(q){document.getElementById("ci").value=q;send();}
+function send(){
+  const ci=document.getElementById("ci"),q=ci.value.trim();if(!q)return;ci.value="";
+  const msgs=document.getElementById("msgs");
+  const um=document.createElement("div");um.className="msg u";um.textContent=q;msgs.appendChild(um);
+  setTimeout(()=>{
+    const am=document.createElement("div");am.className="msg ai";
+    am.innerHTML=ANS[q]||"Verwerking vereist een gekoppeld AI-model.<br><em style=\"color:#484f58\">Demo modus actief</em>";
+    const s=document.createElement("div");s.className="src";
+    s.textContent="Bronnen: Firewall logs (12 apr) - Entra ID (live) - NMAP (13 apr) - Outflank (mei 2024)";
+    am.appendChild(s);msgs.appendChild(am);msgs.scrollTop=msgs.scrollHeight;
+  },550);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+document.getElementById("ci").addEventListener("keydown",e=>{if(e.key==="Enter")send();});
+</script>
+</body>
+</html>
