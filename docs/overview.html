@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Security Posture Tool — Overzicht van te bouwen onderdelen</title>
+<style>
+  body { font-family: Georgia, 'Times New Roman', serif; max-width: 960px; margin: 2.5em auto; padding: 0 1.5em; color: #1a1a1a; line-height: 1.6; }
+  h1 { font-size: 1.7em; border-bottom: 2px solid #000; padding-bottom: 0.3em; margin-bottom: 0.4em; }
+  h2 { font-size: 1.2em; margin-top: 2.2em; border-bottom: 1px solid #999; padding-bottom: 0.15em; }
+  h3 { font-size: 1em; margin-top: 1.3em; margin-bottom: 0.3em; }
+  .meta { background: #f3f3f3; padding: 0.8em 1em; border-left: 4px solid #333; margin-bottom: 1.8em; font-family: Arial, sans-serif; font-size: 0.9em; }
+  .meta p { margin: 0.2em 0; }
+  .intro { background: #fff8e6; border-left: 4px solid #e6a817; padding: 0.7em 1.2em; margin: 1.4em 0; font-size: 0.95em; }
+  table { border-collapse: collapse; width: 100%; margin: 0.8em 0; font-family: Arial, sans-serif; font-size: 0.88em; }
+  th { background: #1a3a5c; color: white; border: 1px solid #1a3a5c; padding: 0.5em 0.8em; text-align: left; font-weight: bold; }
+  td { border: 1px solid #ccc; padding: 0.5em 0.8em; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  .entities-table th { background: #2a4365; }
+  .layers-table th { background: #276749; }
+  .modules-table th { background: #7d4e00; }
+  .build-table th { background: #1a3a5c; }
+  .status-mvp { background: #c53030; color: white; padding: 0.12em 0.5em; border-radius: 3px; font-size: 0.78em; font-weight: bold; letter-spacing: 0.03em; }
+  .status-v2 { background: #c05621; color: white; padding: 0.12em 0.5em; border-radius: 3px; font-size: 0.78em; font-weight: bold; letter-spacing: 0.03em; }
+  .status-later { background: #718096; color: white; padding: 0.12em 0.5em; border-radius: 3px; font-size: 0.78em; font-weight: bold; letter-spacing: 0.03em; }
+  .layer-badge { display: inline-block; padding: 0.12em 0.55em; border-radius: 3px; font-size: 0.8em; font-weight: bold; color: white; letter-spacing: 0.02em; }
+  .layer-1 { background: #1a5490; }
+  .layer-2 { background: #2b7a8a; }
+  .layer-3 { background: #2c7a4c; }
+  .layer-4 { background: #7d4e00; }
+  .layer-5 { background: #8b3a3a; }
+  .layer-6 { background: #5a2d82; }
+  .layer-7 { background: #555; }
+  .diagram { background: #f9f9f9; border: 1px solid #ccc; padding: 1em; margin: 1em 0; font-family: 'Courier New', monospace; font-size: 0.85em; white-space: pre; overflow-x: auto; }
+  .legend { display: flex; gap: 1.5em; flex-wrap: wrap; margin: 0.8em 0; font-family: Arial, sans-serif; font-size: 0.85em; }
+  .legend-item { display: flex; align-items: center; gap: 0.4em; }
+  .footer { margin-top: 3em; border-top: 1px solid #ccc; padding-top: 1em; font-size: 0.85em; color: #666; font-family: Arial, sans-serif; }
+  strong { color: #000; }
+  .waarde { color: #276749; font-style: italic; font-size: 0.92em; }
+  .num { color: #999; font-weight: bold; margin-right: 0.3em; }
+  ul { padding-left: 1.3em; }
+  li { margin: 0.25em 0; }
+  @media print { body { margin: 1cm; max-width: 100%; } h1 { page-break-before: avoid; } h2 { page-break-after: avoid; } }
+</style>
+</head>
+<body>
+
+<h1>Security Posture Tool — Overzicht van te bouwen onderdelen</h1>
+
+<div style="background: #fff3cd; border-left: 4px solid #b8860b; padding: 0.8em 1.2em; margin-bottom: 1.5em; font-family: Arial, sans-serif; font-size: 0.92em;">
+  <strong>Status: vision-overzicht (v1.0+).</strong>
+  Dit document toont wat we op termijn kunnen bouwen. De allereerste release (v0.1) is bewust veel kleiner: één Entra-connector, SQLite, één web-pagina. Zie <code>v0.1-mvp.md</code> voor wat er daadwerkelijk in versie 0.1 zit.
+</div>
+
+<div class="meta">
+  <p><strong>Versie:</strong> 0.1 — bij architectuur-concept</p>
+  <p><strong>Datum:</strong> 19 april 2026</p>
+  <p><strong>Doel:</strong> in één oogopslag zien wat de tool doet, welke onderdelen er zijn, en wat wel/niet in MVP zit</p>
+  <p><strong>Positionering:</strong> operationele tool voor security-teams / interventieteams. Voor compliance-rapportage aan bestuur en toezichthouders is er <code>grc-platform</code>.</p>
+  <p><strong>Begeleidend:</strong> <code>architecture.md</code> (volledig ontwerp) · <code>defense-in-depth-research.md</code> (theorie) · <code>open-source-tool-selectie.md</code> (tooling per laag)</p>
+</div>
+
+<div class="intro">
+  <strong>In één zin:</strong> een operationele tool voor security-teams en interventieteams. Haalt data op, groepeert 14.000 losse scan-records tot een handvol bruikbare bevindingen, en laat zien waar je nu aan moet werken — met het bewijs één klik weg bij elk item. Geen audit-wizard; voor compliance-rapportage is er <code>grc-platform</code>.
+</div>
+
+<h2>1. Architectuur in één plaatje</h2>
+
+<div class="diagram">
+┌─────────────────────────────────────────────────────────────┐
+│                       Frontend (web)                        │
+│   Dashboard · Findings-list · Finding-detail                │
+│   Runbook-runner · Controls-overzicht · Instellingen        │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ HTTP/JSON
+┌──────────────────────────────┴──────────────────────────────┐
+│                      Backend (API)                          │
+│                                                             │
+│   Intake          Analysis           Presentation           │
+│   ──────          ────────           ────────────           │
+│   connectors/     rules/             prioritizer/           │
+│   instructions/   ai_interpreter/    reporter/              │
+│   normalizer/     aggregator/                               │
+│                                                             │
+│   ─────────────── gedeeld domein ─────────────────          │
+│   Evidence · Observation · Finding · Control · Asset        │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                    ┌──────────┴──────────┐
+                    │  Postgres + blob    │
+                    └─────────────────────┘
+</div>
+
+<p><em>Modules praten uitsluitend via de gedeelde domeintabellen. Intake schrijft Observations; Analysis leest Observations en schrijft Findings; Presentation leest Findings. Dat maakt elk onderdeel los testbaar en los vervangbaar.</em></p>
+
+<h2>2. De vijf kern-entiteiten</h2>
+
+<table class="entities-table">
+<thead>
+<tr><th style="width: 15%;">Entiteit</th><th style="width: 35%;">Wat het is</th><th style="width: 50%;">Toegevoegde waarde</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Evidence</strong></td>
+  <td>Het ruwe bewijsmateriaal: CSV, JSON-dump, log-export, script-uitdraai. Onveranderlijk, met SHA-256 integriteitshash.</td>
+  <td>Elke uitspraak van de tool is herleidbaar naar de originele bron. Twijfel je tijdens een incident aan een cijfer? Eén klik en je ziet de log-regel of CSV waar hij vandaan komt.</td>
+</tr>
+<tr>
+  <td><strong>Observation</strong></td>
+  <td>Eén los feit, uit één bron, op één moment. Bijv. <em>"admin_user heeft geen MFA, volgens Entra, op 19 april"</em>. Geen oordeel, geen prioriteit.</td>
+  <td>Feiten en interpretatie gescheiden houden. Eén feit kan in meerdere bevindingen meetellen; zonder deze scheiding verdrinkt het onderwerp in de bron.</td>
+</tr>
+<tr>
+  <td><strong>Finding</strong></td>
+  <td>Een bevinding op onderwerp: <em>"Privileged accounts missen MFA — 55 assets geraakt"</em>. Aggregeert observations uit verschillende bronnen.</td>
+  <td>Een analist wil de tien grootste dingen oplossen, niet door tienduizend records zoeken. Dit is de laag waar je concreet op handelt.</td>
+</tr>
+<tr>
+  <td><strong>Control</strong></td>
+  <td>De meetlat — YAML-definitie met ID (bv. <code>IAM-MFA-01</code>), doel, regels, en verwijzingen naar connectors/runbooks.</td>
+  <td>Zonder gedeelde definitie kan je niet vergelijken — niet tussen gemeenten, niet tussen tijdsperiodes, niet met auditors. Controls zijn je common language.</td>
+</tr>
+<tr>
+  <td><strong>Asset</strong></td>
+  <td>Het object waar het over gaat: account, server, netwerksegment, applicatie, datastore. Met type, kritiekheid (1–5), eigenaar.</td>
+  <td>"Server zonder patch" zegt weinig. <em>"Kritieke productie-server zonder patch"</em> zegt alles. Assets leveren de context voor prioritering.</td>
+</tr>
+</tbody>
+</table>
+
+<h2>3. De zeven Defense-in-Depth-lagen</h2>
+
+<table class="layers-table">
+<thead>
+<tr><th style="width: 4%;">#</th><th style="width: 20%;">Laag</th><th style="width: 38%;">Wat er beschermd wordt</th><th style="width: 38%;">Voorbeelden van controls</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td><span class="layer-badge layer-1">1</span></td>
+  <td><strong>Perimeter</strong></td>
+  <td>De buitengrens — wat voorkomt dat iets binnenkomt.</td>
+  <td>VPN, NGFW, IPS, DDoS-mitigatie, DNS-filtering</td>
+</tr>
+<tr>
+  <td><span class="layer-badge layer-2">2</span></td>
+  <td><strong>Netwerk &amp; Segmentatie</strong></td>
+  <td>Eenmaal binnen — hoe ver beweegt een aanvaller zich?</td>
+  <td>NAC 802.1X, VLAN-scheiding, SMB-signing, ZTNA</td>
+</tr>
+<tr>
+  <td><span class="layer-badge layer-3">3</span></td>
+  <td><strong>Endpoint</strong></td>
+  <td>De apparaten zelf — wat voorkomt dat één laptop de keten breekt?</td>
+  <td>EDR/XDR, patching, app-whitelisting, LAPS, lokale admin-rechten</td>
+</tr>
+<tr>
+  <td><span class="layer-badge layer-4">4</span></td>
+  <td><strong>IAM (Identity)</strong></td>
+  <td>Wie mag wat — kloppen de deuren en sleutels?</td>
+  <td>MFA, PAM, Just-in-Time, privileged session monitoring</td>
+</tr>
+<tr>
+  <td><span class="layer-badge layer-5">5</span></td>
+  <td><strong>Applicatie &amp; Data</strong></td>
+  <td>Diensten en de data erin — staan die goed beschermd?</td>
+  <td>WAF, API-gateway, encryptie-in-rust, DLP, immutable backups</td>
+</tr>
+<tr>
+  <td><span class="layer-badge layer-6">6</span></td>
+  <td><strong>Monitoring &amp; IR</strong></td>
+  <td>Zicht hebben en kunnen reageren — zien we het en grijpen we in?</td>
+  <td>SIEM, UEBA (afwijkend gedrag), SOAR (automatische respons)</td>
+</tr>
+<tr>
+  <td><span class="layer-badge layer-7">7</span></td>
+  <td><strong>EMSEC</strong></td>
+  <td>Fysieke emissie — lek je informatie via radiostraling of stroomnet?</td>
+  <td>TEMPEST-gecertificeerde hardware, facility-zonering, Red/Black-kabelscheiding</td>
+</tr>
+</tbody>
+</table>
+
+<p><em>Samen vormen ze defense-in-depth: faalt één laag, dan vangt een volgende af. De D3-fan toont per laag de posture.</em></p>
+
+<h2>4. De drie pijlers — wat de tool voor je doet</h2>
+
+<table>
+<thead>
+<tr><th style="width: 25%;">Pijler</th><th style="width: 40%;">Wat het doet</th><th style="width: 35%;">Waarom waardevol</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>1. Instructies voor data-verzameling</strong></td>
+  <td>Vertelt je hoe je data binnenkrijgt. "Om MFA-status on-prem te meten, draai dit script op een DC en upload de CSV". Runbooks zijn leesbaar Markdown, versiebeheerd.</td>
+  <td>Je kunt de tool ook gebruiken voor systemen zonder API. EMSEC-laag werkt alleen via deze pijler (facility-audits zijn niet te automatiseren).</td>
+</tr>
+<tr>
+  <td><strong>2. AI-geassisteerde analyse</strong></td>
+  <td>AI helpt bij het begrijpen van unstructured data (configs, vrije tekst), stelt findings voor die regels niet kunnen maken, voegt business-impact-uitleg toe. Altijd met provenance en menselijke review.</td>
+  <td>Je rule-engine dekt 80%. AI pakt de moeilijke 20%. Zonder AI laat je die liggen; met AI kan je leunen op ervaren analyse zonder dure consultant.</td>
+</tr>
+<tr>
+  <td><strong>3. Actiegerichte top-N + verdedigingslaag-overzicht</strong></td>
+  <td>De findings-list toont direct wat er nu brandt, gesorteerd op urgentie, met één-regel-uitleg per positie. De fan toont per laag de staat — niet als percentage, maar als actie-indicator ("hier zitten je drie topitems"). Analist pakt nummer één.</td>
+  <td>Je houdt niet 14 spreadsheets bij. Eén plek, één lijst, één fan. Beweegt mee als de dreiging verandert.</td>
+</tr>
+</tbody>
+</table>
+
+<h2>5. De drie modules — wat er gebouwd wordt</h2>
+
+<table class="modules-table">
+<thead>
+<tr><th style="width: 20%;">Module</th><th style="width: 35%;">Functie</th><th style="width: 45%;">Onderdelen</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Intake</strong><br><em>(data-kraan)</em></td>
+  <td>Krijgt ruwe data binnen via drie wegen: automatische connectors, menselijk uitgevoerde runbooks, directe analist-input. Alle wegen eindigen als Observations.</td>
+  <td>
+    <ul>
+      <li><code>connectors/</code> — plug-in stijl, één per bron</li>
+      <li><code>instructions/</code> — runbook-loader + upload-endpoint</li>
+      <li><code>normalizer/</code> — schema-driven + escape-hatch</li>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><strong>Analysis</strong><br><em>(sense-making)</em></td>
+  <td>Leest Observations, past regels (en waar nodig AI) toe, produceert Findings. Regels eerst (deterministisch), AI als fallback. AI-findings krijgen menselijke review voor publicatie.</td>
+  <td>
+    <ul>
+      <li><code>rules/</code> — rule-engine + DSL-parser</li>
+      <li><code>ai_interpreter/</code> — LLM-call + provenance + redactie</li>
+      <li><code>aggregator/</code> — observations → findings</li>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><strong>Presentation</strong><br><em>(overzicht)</em></td>
+  <td>Toont findings in D3-fan, rangschikt op urgentie via transparante formule + AI-uitleg, exporteert rapporten.</td>
+  <td>
+    <ul>
+      <li><code>prioritizer/</code> — formule + AI-rationale</li>
+      <li><code>reporter/</code> — export JSON/CSV/PDF</li>
+      <li>Frontend: fan, lijst, detail, runbook-runner</li>
+    </ul>
+  </td>
+</tr>
+</tbody>
+</table>
+
+<h2>6. Te bouwen onderdelen — bouwblokken-overzicht</h2>
+
+<div class="legend">
+  <div class="legend-item"><span class="status-mvp">MVP</span> In de eerste release</div>
+  <div class="legend-item"><span class="status-v2">V2</span> Volgt in tweede release</div>
+  <div class="legend-item"><span class="status-later">Later</span> Op de horizon, geen concrete planning</div>
+</div>
+
+<h3>Intake — onderdelen</h3>
+<table class="build-table">
+<thead>
+<tr><th style="width: 28%;">Bouwblok</th><th style="width: 52%;">Wat het doet</th><th style="width: 20%;">Fase</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>BaseConnector abstract class</strong></td><td>Standaardinterface die elke connector moet implementeren (<code>fetch() → Observations</code>).</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Connector: entra_id</strong></td><td>Haalt MFA-status, privileged accounts, sign-ins uit Microsoft Graph API.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Connector: nmap</strong></td><td>Parser voor NMAP XML-export — service discovery, open ports, legacy-systemen.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Connector: vuln_scanner</strong></td><td>Parser voor OpenVAS/Greenbone XML — kwetsbaarheden, patch-achterstand, EOL-systemen.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>HTTP-callback endpoint</strong></td><td>"Bring your own scanner" — externe tools POSTen observations rechtstreeks.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Runbook-loader</strong></td><td>Leest Markdown+YAML-runbooks uit <code>runbooks/</code> en <code>overlay/runbooks/</code>.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Runbook-runner UI</strong></td><td>Toont beschikbare runbooks per onderwerp, begeleid uploaden, feedback.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Schema-driven normalizer</strong></td><td>Vertaalt CSV/JSON/XML-kolommen naar domein-velden volgens runbook-frontmatter.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Python escape-hatch normalizer</strong></td><td>Voor runbooks waar schema-mapping te kort schiet: <code>runbooks/&lt;id&gt;/normalizer.py</code>.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Evidence-upload + SHA-256</strong></td><td>Bestand opslaan, hash berekenen, integriteit-check bij elke lezing.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Deduplicatie</strong></td><td>Idempotency-key op <code>(source, asset, fact-type, observed_at)</code>.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Async task-queue</strong></td><td>Uploads en grote connector-pulls worden async verwerkt.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Cron-scheduling per connector</strong></td><td>Automatisch periodiek pullen volgens configuratie.</td><td><span class="status-v2">V2</span></td></tr>
+<tr><td><strong>Extra connectors</strong></td><td>Firewall-logs, BloodHound, SIEM-log, EDR-API, DNS-logs, backup-API, facility-audit-import.</td><td><span class="status-v2">V2</span></td></tr>
+<tr><td><strong>CMDB-connector</strong></td><td>Synchronisatie van assets met externe CMDB.</td><td><span class="status-later">Later</span></td></tr>
+</tbody>
+</table>
+
+<h3>Analysis — onderdelen</h3>
+<table class="build-table">
+<thead>
+<tr><th style="width: 28%;">Bouwblok</th><th style="width: 52%;">Wat het doet</th><th style="width: 20%;">Fase</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>YAML-control-loader</strong></td><td>Leest <code>controls/</code> en <code>overlay/controls/</code>, valideert tegen schema.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Rule-DSL parser</strong></td><td>Simpele match-expressies die niet-ontwikkelaars kunnen lezen.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Rule-engine (evaluator)</strong></td><td>Past rules toe op observations → Findings.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Rule-unit-testing framework</strong></td><td>Fixture → verwacht finding. Vangt regressies in rule-authoring.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>AI-interpreter</strong></td><td>Stelt Findings voor uit unstructured evidence waar rules niet passen.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>AI-provenance-opslag</strong></td><td>Slaat model, prompt-versie, input-hash op bij elk AI-veld.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Redactie-laag</strong></td><td>Pseudonimiseert PII en hostnames vóór externe AI-call.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>LLM-provider abstractie</strong></td><td>Schakelbaar tussen Ollama (lokaal) en externe API.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Aggregator</strong></td><td>Bundelt observations per control-scope, creëert/muteert Findings.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Pending-review workflow</strong></td><td>AI-findings wachten op menselijke publicatie-OK.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong><code>/reload-rules</code> endpoint</strong></td><td>Manual reload van rules/controls zonder restart.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>CI-gate voor rule-tests</strong></td><td>Geen merge zonder groene rule-testsuite.</td><td><span class="status-v2">V2</span></td></tr>
+<tr><td><strong>Agentic AI-modus</strong></td><td>AI kiest autonoom runbooks, bevraagt connectors.</td><td><span class="status-later">Later</span></td></tr>
+</tbody>
+</table>
+
+<h3>Presentation — onderdelen</h3>
+<table class="build-table">
+<thead>
+<tr><th style="width: 28%;">Bouwblok</th><th style="width: 52%;">Wat het doet</th><th style="width: 20%;">Fase</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>D3 DiD-fan (7 segmenten)</strong></td><td>Hoofdvisualisatie per verdedigingslaag. Gevoed door Findings.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Findings-list</strong></td><td>Tabel met filter, zoek, sort. Voor analisten.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Finding-detail-pagina</strong></td><td>Volledig zicht op één finding, met observation-drilldown en evidence-download.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Controls-overzicht</strong></td><td>Welke controls bestaan, per laag, welke worden gevoed door welke bronnen.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Prioritizer — baseline-formule</strong></td><td><code>asset-criticaliteit × severity × exploitability × recency</code> met configureerbare gewichten.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Prioritizer — AI-rationale</strong></td><td>Voegt één-regel-uitleg per ranking-positie toe. Max ±1 positie aanpassing.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Reporter — JSON export</strong></td><td>Machine-leesbare uitvoer van findings + observations.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Reporter — CSV export</strong></td><td>Voor Excel-gebruik en handmatige analyse.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Reporter — PDF-rapport</strong></td><td>Samenvattend rapport voor als je het wel wil delen: status per laag, top-findings, trendlijnen.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Instellingen-UI</strong></td><td>LLM-provider keuze, prioritizer-gewichten, pending-review-drempel.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Real-time updates (websockets)</strong></td><td>Fan ververst live bij nieuwe findings.</td><td><span class="status-v2">V2</span></td></tr>
+<tr><td><strong>Webhook-out</strong></td><td>Push nieuwe findings naar SOAR / ticketing.</td><td><span class="status-v2">V2</span></td></tr>
+<tr><td><strong>Mobile-responsive layout</strong></td><td>Dashboard bruikbaar op tablet/telefoon.</td><td><span class="status-later">Later</span></td></tr>
+<tr><td><strong>Theming per tenant</strong></td><td>Logo/kleur per organisatie.</td><td><span class="status-later">Later</span></td></tr>
+</tbody>
+</table>
+
+<h3>Domein + Storage — onderdelen</h3>
+<table class="build-table">
+<thead>
+<tr><th style="width: 28%;">Bouwblok</th><th style="width: 52%;">Wat het doet</th><th style="width: 20%;">Fase</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Domain-modellen</strong></td><td>Evidence, Observation, Finding, Control, Asset — inclusief JSON Schema's.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Postgres-repo</strong></td><td>CRUD-laag met migratiesysteem.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Blob-store-abstractie</strong></td><td>Lokale disk of S3-compatible (MinIO), configureerbaar.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Audit-log</strong></td><td>Alle schrijf-acties, evidence-downloads, publish-beslissingen.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Retentie-mechanisme</strong></td><td>Evidence wordt hard-deleted na configureerbare termijn (default 7 jaar).</td><td><span class="status-v2">V2</span></td></tr>
+</tbody>
+</table>
+
+<h3>Governance &amp; bedrijfsklaar — onderdelen</h3>
+<table class="build-table">
+<thead>
+<tr><th style="width: 28%;">Bouwblok</th><th style="width: 52%;">Wat het doet</th><th style="width: 20%;">Fase</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>docker-compose packaging</strong></td><td>One-command start-and-use installatie.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Health-check endpoints</strong></td><td>Liveness + readiness per component.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Prometheus metrics-endpoint</strong></td><td>Observability-hook voor monitoring-infra.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Structured JSON-logging</strong></td><td>Machine-leesbare logs, compatibel met SIEM.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>getting-started.md</strong></td><td>Vijf-minuten-op-weg documentatie.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>extending.md</strong></td><td>Hoe schrijf je een eigen connector, control, runbook.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>EUPL-1.2 licentie</strong></td><td>Europese publieke licentie, passend bij de publieke sector.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>CONTRIBUTING.md + CODEOWNERS</strong></td><td>Bijdrage-proces voor community.</td><td><span class="status-mvp">MVP</span></td></tr>
+<tr><td><strong>Helm-chart (Kubernetes)</strong></td><td>Deployment op K8s-cluster.</td><td><span class="status-v2">V2</span></td></tr>
+<tr><td><strong>Vault-integratie</strong></td><td>Secrets niet meer in <code>.env</code> maar in Vault/OpenBao.</td><td><span class="status-v2">V2</span></td></tr>
+<tr><td><strong>Authenticatie (OIDC)</strong></td><td>Login via Authentik/Keycloak. Rol-model: Admin/Analyst/Reviewer/Viewer.</td><td><span class="status-later">Later</span></td></tr>
+<tr><td><strong>Multi-scope / multi-tenancy</strong></td><td>Eén install, meerdere organisaties/gemeenten gescheiden.</td><td><span class="status-later">Later</span></td></tr>
+<tr><td><strong>Framework-mapping vullen</strong></td><td>Per control: mapping naar CIS v8.1, ISO 27001:2022, NIST CSF 2.0.</td><td><span class="status-later">Later</span></td></tr>
+<tr><td><strong>Koppeling grc-platform</strong></td><td>Export van findings naar IMS-tooling-risicoregister.</td><td><span class="status-later">Later</span></td></tr>
+<tr><td><strong>Community-overlay-repo</strong></td><td>Aparte repo voor door de gemeenschap bijgedragen controls en runbooks.</td><td><span class="status-later">Later</span></td></tr>
+</tbody>
+</table>
+
+<h2>7. Wat een MVP minimaal kan laten zien</h2>
+
+<div class="intro">
+  <strong>End-to-end werkend pad:</strong> <em>één</em> connector <em>(entra_id)</em> + <em>één</em> runbook <em>(on-prem AD MFA-check)</em> + <em>één</em> control <em>(IAM-MFA-01)</em> met <em>één</em> rule → findings zichtbaar in de fan, met drilldown naar het bewijs.
+</div>
+
+<ul>
+  <li>User opent tool, ziet fan met 7 segmenten, IAM-segment gekleurd rood</li>
+  <li>Klik op IAM-segment → findings-list met "Privileged accounts missen MFA — 55 assets"</li>
+  <li>Klik op finding → detail-pagina met observation-drilldown per bron (Entra én on-prem)</li>
+  <li>Klik op observation → evidence-bestand downloaden, met SHA-check</li>
+  <li>Prioritering in findings-list met uitleg per positie</li>
+  <li>Export naar PDF als je het wil delen met stakeholders buiten het team</li>
+</ul>
+
+<h2>8. Waarom dit waardevol is voor een security-team</h2>
+
+<table>
+<thead>
+<tr><th style="width: 35%;">Eigenschap</th><th style="width: 65%;">Waarde in de praktijk</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Van 14.000 records naar 8 acties</strong></td><td>Een volle NMAP/OpenVAS-scan levert duizenden losse vulns. De tool groepeert die tot een hanteerbaar aantal bevindingen per onderwerp. Je ploegt niet door raw logs — je pakt nummer één van de lijst.</td></tr>
+<tr><td><strong>Bewijs één klik weg</strong></td><td>Elke bevinding linkt naar de onderliggende observations en het originele bewijsbestand (met integriteitshash). Snel verifiëren tijdens een incident, geen getwijfel over "klopt dit cijfer nog?".</td></tr>
+<tr><td><strong>Runbook-gestuurd werken</strong></td><td>Systeem zonder API? De tool vertelt je welk script je waar moet draaien en hoe je de output inbrengt. Ideaal voor interventieteams die een onbekende omgeving ingaan.</td></tr>
+<tr><td><strong>Prioriteit die meebeweegt</strong></td><td>Nieuwe exploit-info komt binnen → priority_score herrekent zich automatisch. Niet meer handmatig spreadsheets bijwerken wanneer de dreiging verandert.</td></tr>
+<tr><td><strong>Herbruikbare checks</strong></td><td>Een security check (YAML-Control zoals <code>IAM-MFA-01</code>) schrijf je één keer, en andere teams en organisaties kunnen 'm overnemen of aanpassen via de overlay-directory.</td></tr>
+<tr><td><strong>Uitbreidbaar tijdens de rit</strong></td><td>Nieuwe check toevoegen = één YAML-bestand in <code>overlay/</code>. Geen code-deploy. Team voegt midden in een traject een custom check toe.</td></tr>
+<tr><td><strong>AI als analist-in-handen</strong></td><td>AI helpt bij het duiden van ongebruikelijke configs en schrijft één-regel-uitleg bij elke prioriteit. Altijd met provenance — je ziet welk model, welke prompt, wanneer. Geen black-box.</td></tr>
+<tr><td><strong>Digitale soevereiniteit</strong></td><td>Lokaal LLM default. On-premise inzet. Air-gapped inzetbaar. Data verlaat de omgeving niet tenzij jij expliciet anders instelt.</td></tr>
+<tr><td><strong>Export wanneer je het wel wil delen</strong></td><td>Stuurt een bestuurder om een samenvatting? PDF-export met findings per laag. Maar dat is een by-product, niet het doel.</td></tr>
+</tbody>
+</table>
+
+<div class="footer">
+  <p><strong>Dit document is een samenvatting.</strong> Voor volledige technische specificatie zie <code>docs/architecture.md</code> in deze repository.</p>
+  <p>Versie 0.1 · 19 april 2026 · status: concept</p>
+</div>
+
+</body>
+</html>

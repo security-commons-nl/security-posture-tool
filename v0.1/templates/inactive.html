@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Inactieve accounts (&gt;90 dagen)</h1>
+<p>Checklist-item <code>3.5</code>: inactieve accounts horen auto-disabled te zijn.</p>
+
+{% if accounts %}
+<table>
+  <thead>
+    <tr>
+      <th>Naam</th>
+      <th>UPN</th>
+      <th>Privileged?</th>
+      <th>Laatste sign-in</th>
+      <th>Bron</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for a in accounts %}
+    <tr>
+      <td>{{ a.display_name or "—" }}</td>
+      <td>{{ a.upn or "—" }}</td>
+      <td>{{ "ja" if a.is_privileged else "nee" }}</td>
+      <td>{{ a.last_signin_at or "nooit" }}</td>
+      <td><code>{{ a.source }}</code></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">Geen inactieve accounts gevonden (of data nog niet verzameld).</p>
+{% endif %}
+{% endblock %}

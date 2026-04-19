@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>MFA — privileged accounts</h1>
+<p>Checklist-item <code>3.1</code>: MFA verplicht op admin-accounts.</p>
+
+{% if accounts %}
+<table>
+  <thead>
+    <tr>
+      <th>Naam</th>
+      <th>UPN</th>
+      <th>MFA</th>
+      <th>Methodes</th>
+      <th>Laatste sign-in</th>
+      <th>Bron</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for a in accounts %}
+    <tr>
+      <td>{{ a.display_name or "—" }}</td>
+      <td>{{ a.upn or "—" }}</td>
+      <td>{{ "ja" if a.mfa_registered else "nee" }}</td>
+      <td>{{ a.mfa_methods or "—" }}</td>
+      <td>{{ a.last_signin_at or "—" }}</td>
+      <td><code>{{ a.source }}</code></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">Nog geen privileged accounts geladen. Klik "Refresh Entra" op het overzicht.</p>
+{% endif %}
+{% endblock %}

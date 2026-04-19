@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>{% block title %}security-posture-tool v0.1{% endblock %}</title>
+<style>
+  body { font-family: system-ui, Arial, sans-serif; max-width: 1000px; margin: 1.5em auto; padding: 0 1em; color: #1a1a1a; }
+  nav { background: #2a4365; color: white; padding: 0.6em 1em; border-radius: 4px; margin-bottom: 1.2em; }
+  nav a { color: #bee3f8; text-decoration: none; margin-right: 1em; font-weight: 500; }
+  nav a:hover { color: white; }
+  nav a.active { color: white; border-bottom: 2px solid white; padding-bottom: 2px; }
+  h1 { font-size: 1.5em; margin-bottom: 0.4em; }
+  h2 { font-size: 1.1em; border-bottom: 1px solid #ccc; padding-bottom: 0.2em; }
+  table { border-collapse: collapse; width: 100%; margin: 0.6em 0; font-size: 0.9em; }
+  th { background: #2a4365; color: white; text-align: left; padding: 0.4em 0.6em; }
+  td { border-bottom: 1px solid #ddd; padding: 0.4em 0.6em; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8f9fa; }
+  .empty { color: #666; font-style: italic; padding: 0.8em 0; }
+  .card { background: #f3f6fa; border-left: 4px solid #2a4365; padding: 0.8em 1em; margin: 0.8em 0; font-size: 0.9em; }
+  button, .btn { background: #2a4365; color: white; border: none; padding: 0.45em 0.9em; border-radius: 3px; cursor: pointer; font-size: 0.9em; font-family: inherit; }
+  button:hover, .btn:hover { background: #1a2a4a; }
+  form.inline { display: inline; }
+  code { background: #eef1f5; padding: 0.1em 0.35em; border-radius: 2px; font-size: 0.85em; }
+  .kpi { display: inline-block; background: white; border: 1px solid #ccc; padding: 0.5em 0.8em; margin-right: 0.6em; border-radius: 3px; font-size: 0.88em; }
+  .kpi strong { color: #2a4365; font-size: 1.3em; display: block; }
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" {% if request.url.path == "/" %}class="active"{% endif %}>Overzicht</a>
+  <a href="/mfa" {% if "/mfa" in request.url.path %}class="active"{% endif %}>MFA</a>
+  <a href="/inactive" {% if "/inactive" in request.url.path %}class="active"{% endif %}>Inactief</a>
+  <a href="/crown-jewels" {% if "/crown-jewels" in request.url.path %}class="active"{% endif %}>Kroonjuwelen</a>
+  <a href="/checklist" {% if "/checklist" in request.url.path %}class="active"{% endif %}>Checklist</a>
+</nav>
+
+{% block content %}{% endblock %}
+
+</body>
+</html>

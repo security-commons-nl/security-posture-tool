@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>security-posture-tool — v0.1</h1>
+<p>Data-verzamelende MVP. Meet een subset van Week 1-items uit de cyber-hygiene-checklist.</p>
+
+<div>
+  <span class="kpi"><strong>{{ total_accounts }}</strong>accounts in DB</span>
+  <span class="kpi"><strong>{{ total_privileged }}</strong>privileged</span>
+  <span class="kpi"><strong>{{ total_crown_jewels }}</strong>kroonjuwelen</span>
+</div>
+
+<h2>Checklist-voortgang</h2>
+{% if checklist %}
+<table>
+  <thead><tr><th>ID</th><th>Maatregel</th><th>Gemeten</th><th>Doel</th><th>Laatst</th></tr></thead>
+  <tbody>
+  {% for c in checklist %}
+    <tr>
+      <td><code>{{ c.checklist_id }}</code></td>
+      <td>{{ c.label }}</td>
+      <td>{{ c.measured_value or "nog niet gemeten" }}</td>
+      <td>{{ c.target or "—" }}</td>
+      <td>{{ c.last_measured_at or "—" }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">Nog geen checklist-items geladen.</p>
+{% endif %}
+
+<h2>Data verzamelen</h2>
+<div class="card">
+  <form class="inline" method="post" action="/entra/refresh">
+    <button type="submit">Refresh Entra</button>
+  </form>
+  &nbsp; trekt privileged accounts + MFA-status + sign-in-activity uit de
+  Microsoft Graph API.
+</div>
+<div class="card">
+  Ga naar <a href="/crown-jewels">Kroonjuwelen</a> om een CSV met de
+  organisatie-kroonjuwelenlijst te uploaden.
+</div>
+{% endblock %}

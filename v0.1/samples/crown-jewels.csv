@@ -1,0 +1,3 @@
+name,owner,vlan_or_subnet,backup_type,rto,rpo
+Voorbeeld-applicatie A,Team Burgerzaken,VLAN 42 / 10.20.42.0/24,immutable Borg + offsite,4 uur,1 uur
+Voorbeeld-database B,Team ICT,VLAN 80 / 10.20.80.0/24,snapshot + tape,24 uur,12 uur

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Checklist-voortgang</h1>
+<p>Subset van Week 1-items uit een cyber-hygiene-checklist voor gemeenten (BIO 2.0 / IBD-geïnspireerd).</p>
+
+{% if checklist %}
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Maatregel</th>
+      <th>Gemeten</th>
+      <th>Doel</th>
+      <th>Laatst gemeten</th>
+      <th>Notitie</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for c in checklist %}
+    <tr>
+      <td><code>{{ c.checklist_id }}</code></td>
+      <td>{{ c.label }}</td>
+      <td>{{ c.measured_value or "—" }}</td>
+      <td>{{ c.target or "—" }}</td>
+      <td>{{ c.last_measured_at or "—" }}</td>
+      <td>{{ c.notes or "" }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">Geen checklist-items.</p>
+{% endif %}
+{% endblock %}

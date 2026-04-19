@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Kroonjuwelen</h1>
+<p>Checklist-item <code>1.1</code>: expliciete lijst, max 20 items, elk met eigenaar.</p>
+
+<div class="card">
+  <form method="post" action="/crown-jewels/upload" enctype="multipart/form-data">
+    <label>CSV uploaden: <input type="file" name="file" accept=".csv" required></label>
+    <button type="submit">Upload</button>
+  </form>
+  <p style="margin: 0.5em 0 0 0; font-size: 0.85em; color: #555;">
+    Verwachte kolommen: <code>name</code> (verplicht), <code>owner</code>,
+    <code>vlan_or_subnet</code>, <code>backup_type</code>, <code>rto</code>,
+    <code>rpo</code>.
+  </p>
+</div>
+
+{% if items %}
+<table>
+  <thead>
+    <tr>
+      <th>Naam</th>
+      <th>Eigenaar</th>
+      <th>VLAN / subnet</th>
+      <th>Backup</th>
+      <th>RTO</th>
+      <th>RPO</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for j in items %}
+    <tr>
+      <td>{{ j.name }}</td>
+      <td>{{ j.owner or "—" }}</td>
+      <td>{{ j.vlan_or_subnet or "—" }}</td>
+      <td>{{ j.backup_type or "—" }}</td>
+      <td>{{ j.rto or "—" }}</td>
+      <td>{{ j.rpo or "—" }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">Nog geen kroonjuwelen geüpload.</p>
+{% endif %}
+{% endblock %}
