@@ -36,6 +36,11 @@ Thumbs.db
 *.sqlite3
 *.db
 
+# Drops — gebruikers-content die buiten de tool leeft
+v0.1/drops/*
+!v0.1/drops/README.md
+!v0.1/drops/.gitkeep
+
 # Terraform
 *.tfstate
 *.tfstate.*

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<p style="margin-bottom: 0.5em;"><a href="/drops">← Terug naar drops</a></p>
+<h1>{{ file.filename }}</h1>
+<p style="color: #555; font-size: 0.9em;"><code>{{ path }}</code></p>
+
+{% if file.type == "csv" %}
+  <p style="font-size: 0.9em;">
+    {{ file.total_rows }} data-rijen totaal.
+    {% if file.truncated %}
+      Hieronder de eerste {{ file.rows|length }}.
+    {% endif %}
+  </p>
+  {% if file.headers %}
+    <table>
+      <thead>
+        <tr>
+        {% for h in file.headers %}<th>{{ h }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+      {% for row in file.rows %}
+        <tr>
+        {% for cell in row %}<td>{{ cell }}</td>{% endfor %}
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty">Leeg bestand of geen headers.</p>
+  {% endif %}
+
+{% elif file.type == "text" %}
+  <p style="font-size: 0.9em;">
+    {% if file.truncated %}
+      Bestand getrunceerd op 500 KB — toon hieronder is niet volledig.
+    {% endif %}
+  </p>
+  <pre style="background: #f6f8fa; border: 1px solid #ddd; padding: 0.8em; overflow-x: auto; font-size: 0.85em; line-height: 1.4;">{{ file.content }}</pre>
+
+{% elif file.type == "binary" %}
+  <p class="empty">
+    Binair of onbekend formaat. Grootte: {{ file.size_human }}. De tool toont dit type
+    niet inline — open het bestand met het native programma.
+  </p>
+{% endif %}
+{% endblock %}

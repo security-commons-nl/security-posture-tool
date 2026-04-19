@@ -12,6 +12,7 @@ from fastapi.templating import Jinja2Templates
 
 import checklist
 import db
+import drops
 import entra
 
 app = FastAPI(title="security-posture-tool v0.1")
@@ -113,6 +114,32 @@ def checklist_page(request: Request):
 @app.get("/uploads", response_class=HTMLResponse)
 def uploads_page(request: Request):
     return templates.TemplateResponse("uploads.html", {"request": request})
+
+
+@app.get("/drops", response_class=HTMLResponse)
+def drops_page(request: Request):
+    return templates.TemplateResponse(
+        "drops.html",
+        {
+            "request": request,
+            "files": drops.list_drops(),
+            "drops_path": str(drops.DROPS_PATH),
+        },
+    )
+
+
+@app.get("/drops/view/{path:path}", response_class=HTMLResponse)
+def drops_view(request: Request, path: str):
+    try:
+        result = drops.read_drop(path)
+    except ValueError:
+        raise HTTPException(400, "Ongeldig pad")
+    if result is None:
+        raise HTTPException(404, "Bestand niet gevonden")
+    return templates.TemplateResponse(
+        "drop_detail.html",
+        {"request": request, "file": result, "path": path},
+    )
 
 
 def _truthy(val: str) -> bool:

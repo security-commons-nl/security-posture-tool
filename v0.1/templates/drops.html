@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Drops — bestanden die buiten de tool leven</h1>
+
+<div class="card">
+  <p style="margin: 0;">
+    Dump bestanden in <code>{{ drops_path }}</code> — CSV-exports van firewall-logs,
+    text-dumps van router-configs, JSON-outputs, wat je wil. De tool leest ze direct
+    in (geen upload-ritueel, geen schema-verplichting). Sub-folders worden recursief
+    gescand.
+  </p>
+  <p style="margin: 0.4em 0 0 0; font-size: 0.85em; color: #555;">
+    Herverversen? Gewoon deze pagina vernieuwen. Filesystem is de bron van waarheid.
+  </p>
+</div>
+
+{% if files %}
+<table>
+  <thead>
+    <tr>
+      <th>Bestand</th>
+      <th>Type</th>
+      <th>Grootte</th>
+      <th>Laatst gewijzigd</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for f in files %}
+    <tr>
+      <td><a href="/drops/view/{{ f.path }}">{{ f.path }}</a></td>
+      <td><code>{{ f.ext or "—" }}</code> ({{ f.kind }})</td>
+      <td>{{ f.size_human }}</td>
+      <td>{{ f.mtime }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">
+  Geen bestanden gevonden in <code>{{ drops_path }}</code>. Zet een CSV of
+  text-file in die folder en ververs deze pagina.
+</p>
+{% endif %}
+
+<div class="card" style="margin-top: 1.2em;">
+  <strong>Wat de tool leest:</strong>
+  <ul style="margin: 0.4em 0 0 0; font-size: 0.88em;">
+    <li><code>.csv</code> / <code>.tsv</code> → getoond als tabel (eerste 200 rijen)</li>
+    <li><code>.txt</code> / <code>.log</code> / <code>.conf</code> / <code>.cfg</code> /
+        <code>.json</code> / <code>.xml</code> / <code>.yaml</code> / bestanden zonder
+        extensie → getoond als tekst (eerste 500 KB)</li>
+    <li>Andere formaten → alleen bestandsnaam en grootte</li>
+  </ul>
+</div>
+{% endblock %}
