@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="nl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Posture Tool - Architectuur Sketch</title>
+    <style>
+        /* CSS Variabelen voor de donkere, high-tech en premium look in de codebase */
+        :root {
+            --bg-base: #0f172a;           /* Donkerste blauw voor achtergrond */
+            --bg-surface: #1e293b;        /* Kaarten / menu vlakken */
+            --bg-surface-hover: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --accent: #3b82f6;            /* Primaire actiekleur */
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            /* Risk Severities */
+            --sev-critical: #ef4444;
+            --sev-high: #f97316;
+            --sev-medium: #eab308;
+            --sev-low: #3b82f6;
+            --sev-info: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            /* Moderne typography zoals afgesproken */
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar --- */
+        aside {
+            width: 260px;
+            background-color: var(--bg-surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            z-index: 10;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: 0.5px;
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-main);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        nav a:hover {
+            background-color: var(--bg-surface-hover);
+            color: var(--text-main);
+        }
+
+        nav a.active {
+            background-color: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        /* --- Main Content --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        header {
+            height: 80px;
+            padding: 0 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 2.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 2rem;
+        }
+
+        /* --- KPI Cards --- */
+        .kpi-row {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-color: #475569;
+        }
+
+        .kpi-title { font-size: 0.875rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .kpi-value { font-size: 2.5rem; font-weight: 700; margin-top: 0.5rem; }
+
+        /* --- The Fan Map (Benadering met CSS Radii) --- */
+        .fan-container {
+            position: relative;
+            height: 400px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            overflow: hidden;
+            border-radius: 16px;
+            background: radial-gradient(circle at bottom center, var(--bg-surface-hover) 0%, var(--bg-surface) 100%);
+        }
+
+        /* Simpele CSS weergave van een gelaagde defense in depth arch */
+        .fan-layer {
+            position: absolute;
+            bottom: -50px;
+            border-radius: 50%;
+            border: 2px dashed rgba(255,255,255,0.1);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 15px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* --- Findings List --- */
+        .findings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+            max-height: 400px;
+            padding-right: 10px;
+        }
+
+        /* Custom scrollbar */
+        .findings-list::-webkit-scrollbar { width: 6px; }
+        .findings-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+        .finding-item {
+            background-color: var(--bg-base);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .finding-item:hover {
+            border-color: var(--accent);
+            background-color: var(--bg-surface-hover);
+        }
+
+        .finding-main {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .finding-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: var(--text-main);
+        }
+
+        .finding-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge {
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.70rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.critical { background: rgba(239, 68, 68, 0.15); color: var(--sev-critical); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge.high { background: rgba(249, 115, 22, 0.15); color: var(--sev-high); border: 1px solid rgba(249, 115, 22, 0.3); }
+        .badge.medium { background: rgba(234, 179, 8, 0.15); color: var(--sev-medium); border: 1px solid rgba(234, 179, 8, 0.3); }
+        .badge.pending { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+
+        .priority-score {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-align: right;
+            line-height: 1;
+        }
+
+        .priority-label {
+            font-size: 0.70rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div class="logo">
+            <div class="logo-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+            SPT 
+        </div>
+
+        <nav>
+            <a href="#" class="active">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+                Dashboard
+            </a>
+            <a href="#">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                Findings list
+            </a>
+            <a href="#">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Intake & Runbooks
+            </a>
+            <a href="#">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                Instellingen
+            </a>
+        </nav>
+    </aside>
+
+    <main>
+        <header>
+            <div class="header-title">DiD Posture Dashboard</div>
+            <div style="display: flex; gap: 16px; align-items: center;">
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Laatste baseline sync: <strong>Vandaag 09:30</strong></div>
+                <div style="width: 36px; height: 36px; background: var(--bg-surface-hover); border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--border);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+            </div>
+        </header>
+
+        <div class="content">
+            
+            <div class="kpi-row">
+                <div class="card" style="border-top: 4px solid var(--accent)">
+                    <div class="kpi-title">Overall Risk Index</div>
+                    <div class="kpi-value" style="color: var(--accent);">B+</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">Substantiële verbetering (+5%) sinds vorige meting</div>
+                </div>
+                <div class="card" style="border-top: 4px solid var(--sev-critical)">
+                    <div class="kpi-title">Critical Findings</div>
+                    <div class="kpi-value">3</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">1x Perimeter, 2x IAM (Actie vereist)</div>
+                </div>
+                <div class="card" style="border-top: 4px solid #c084fc">
+                    <div class="kpi-title">AI Pending Review</div>
+                    <div class="kpi-value">12</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">Observations vereisen menselijke triage</div>
+                </div>
+            </div>
+
+            <!-- DiD Fan View -->
+            <div class="card" style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="font-size: 1.1rem; color: var(--text-main);">7-Laags Defense Model</h2>
+                    <span class="badge" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--text-main);">Interactieve Mockup</span>
+                </div>
+                
+                <div class="fan-container">
+                    <!-- Layer 7 -->
+                    <div class="fan-layer" style="width: 550px; height: 550px; border-color: rgba(59, 130, 246, 0.1);">1. Perimeter</div>
+                    <!-- Layer 6 -->
+                    <div class="fan-layer" style="width: 460px; height: 460px; border-color: rgba(59, 130, 246, 0.2);">2. Network & Seg.</div>
+                    <!-- Layer 5 -->
+                    <div class="fan-layer" style="width: 370px; height: 370px; border-color: rgba(239, 68, 68, 0.4); box-shadow: inset 0 20px 50px rgba(239,68,68,0.1);">3. Endpoint</div>
+                    <!-- Layer 4 -->
+                    <div class="fan-layer" style="width: 280px; height: 280px; border-color: rgba(239, 68, 68, 0.8); background: rgba(239, 68, 68, 0.05); color: var(--sev-critical);">4. IAM (Aandacht!)</div>
+                    <!-- Layer 3 -->
+                    <div class="fan-layer" style="width: 190px; height: 190px; border-color: rgba(234, 179, 8, 0.4);">5. App & Data</div>
+                    <!-- Layer 2 -->
+                    <div class="fan-layer" style="width: 110px; height: 110px; border-color: rgba(59, 130, 246, 0.4);">6. Monitor & IR</div>
+                    <!-- Layer 1 -->
+                    <div class="fan-layer" style="width: 40px; height: 40px; border-color: rgba(59, 130, 246, 0.6);"></div>
+                </div>
+            </div>
+
+            <!-- Priority Findings -->
+            <div class="card" style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="font-size: 1.1rem; color: var(--text-main);">Top Priority Findings</h2>
+                    <a href="#" style="font-size: 0.85rem; color: var(--accent); text-decoration: none; font-weight: 600;">Bekijk alle (48) &rarr;</a>
+                </div>
+
+                <div class="findings-list">
+                    
+                    <div class="finding-item" style="border-left: 3px solid var(--sev-critical);">
+                        <div class="finding-main">
+                            <div class="finding-title">Privileged accounts missen phishing-resistente MFA</div>
+                            <div class="finding-meta">
+                                <span class="badge critical">Critical Severity</span>
+                                <span>Check: <b>IAM-MFA-01</b></span>
+                                <span>Laag: 4. IAM</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="priority-score">98.5</div>
+                            <div class="priority-label">Priority Score</div>
+                        </div>
+                    </div>
+
+                    <div class="finding-item" style="border-left: 3px solid var(--sev-critical);">
+                        <div class="finding-main">
+                            <div class="finding-title">Onversleutelde SQL database blootgesteld via open SMB share</div>
+                            <div class="finding-meta">
+                                <span class="badge critical">Critical Severity</span>
+                                <span class="badge pending">AI Reviewed</span>
+                                <span>Check: <b>APP-ENC-02</b></span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="priority-score">94.2</div>
+                            <div class="priority-label">Priority Score</div>
+                        </div>
+                    </div>
+
+                    <div class="finding-item" style="border-left: 3px solid var(--sev-high);">
+                        <div class="finding-main">
+                            <div class="finding-title">Domein admin account 'service_backup' is orphan zonder lifecycle status</div>
+                            <div class="finding-meta">
+                                <span class="badge high">High Severity</span>
+                                <span>Check: <b>IAM-LIFECYCLE-03</b></span>
+                                <span>Laag: 4. IAM</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="priority-score">88.0</div>
+                            <div class="priority-label">Priority Score</div>
+                        </div>
+                    </div>
+
+                    <div class="finding-item" style="border-left: 3px solid var(--sev-high);">
+                        <div class="finding-main">
+                            <div class="finding-title">Nmap detecteert direct open RDP (3389) op een publiek IP segment</div>
+                            <div class="finding-meta">
+                                <span class="badge high">High Severity</span>
+                                <span>Check: <b>PERIM-PORT-01</b></span>
+                                <span>Laag: 1. Perimeter</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="priority-score">85.6</div>
+                            <div class="priority-label">Priority Score</div>
+                        </div>
+                    </div>
+
+                    <div class="finding-item" style="border-left: 3px solid var(--sev-medium);">
+                        <div class="finding-main">
+                            <div class="finding-title">Outdated TLS 1.1 protocol actief op interne portal nginx</div>
+                            <div class="finding-meta">
+                                <span class="badge medium">Medium Severity</span>
+                                <span>Check: <b>APP-SEC-04</b></span>
+                                <span>Laag: 5. App & Data</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="priority-score">45.1</div>
+                            <div class="priority-label">Priority Score</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>
