@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Uploads — Intune-exports</h1>
+<p>Voor checklist-items waar v0.1 nog geen directe connector voor heeft.</p>
+
+<h2>LAPS-dekking (3.4)</h2>
+<div class="card">
+  <form method="post" action="/uploads/laps" enctype="multipart/form-data">
+    <label>CSV: <input type="file" name="file" accept=".csv" required></label>
+    <button type="submit">Upload</button>
+  </form>
+  <p style="margin: 0.5em 0 0 0; font-size: 0.85em; color: #555;">
+    Verplichte kolommen: <code>device_name</code>, <code>laps_configured</code>
+    (true/false of yes/no). Optioneel: <code>os</code>, <code>laps_last_rotation</code>.
+  </p>
+</div>
+
+<h2>Office-macros ASR-rule (7.2)</h2>
+<div class="card">
+  <form method="post" action="/uploads/asr" enctype="multipart/form-data">
+    <label>CSV: <input type="file" name="file" accept=".csv" required></label>
+    <button type="submit">Upload</button>
+  </form>
+  <p style="margin: 0.5em 0 0 0; font-size: 0.85em; color: #555;">
+    Verplichte kolommen: <code>device_name</code>,
+    <code>asr_office_macros_blocked</code> (true/false).
+  </p>
+</div>
+
+<p style="margin-top: 1.5em; font-size: 0.9em; color: #666;">
+  Beide uploads berekenen een dekkingspercentage en schrijven die naar de
+  checklist. Individuele device-records worden in v0.1 nog niet opgeslagen —
+  alleen de aggregate.
+</p>
+{% endblock %}

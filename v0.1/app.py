@@ -108,3 +108,72 @@ def checklist_page(request: Request):
         "checklist.html",
         {"request": request, "checklist": db.fetch_checklist()},
     )
+
+
+@app.get("/uploads", response_class=HTMLResponse)
+def uploads_page(request: Request):
+    return templates.TemplateResponse("uploads.html", {"request": request})
+
+
+def _truthy(val: str) -> bool:
+    return str(val).strip().lower() in {"true", "yes", "ja", "1", "enabled", "on"}
+
+
+@app.post("/uploads/laps")
+async def uploads_laps(file: UploadFile = File(...)):
+    """CSV met minimaal kolommen: device_name, laps_configured.
+
+    Checklist 3.4 — LAPS op werkplekken + servers.
+    """
+    if not file.filename.lower().endswith(".csv"):
+        raise HTTPException(400, "Alleen CSV-upload")
+    content = (await file.read()).decode("utf-8-sig")
+    reader = csv.DictReader(io.StringIO(content))
+    required = {"device_name", "laps_configured"}
+    if not required.issubset(reader.fieldnames or []):
+        raise HTTPException(400, f"CSV mist verplichte kolommen: {required}")
+    total = 0
+    covered = 0
+    for row in reader:
+        total += 1
+        if _truthy(row.get("laps_configured", "")):
+            covered += 1
+    pct = f"{(covered / total * 100):.0f}%" if total else "n.v.t."
+    db.set_checklist_state(
+        "3.4",
+        "LAPS op werkplekken + servers",
+        measured_value=f"{covered}/{total} ({pct})",
+        target="100%",
+        notes=f"Upload {file.filename}; bron: Intune/AD-export.",
+    )
+    return RedirectResponse("/checklist", status_code=303)
+
+
+@app.post("/uploads/asr")
+async def uploads_asr(file: UploadFile = File(...)):
+    """CSV met minimaal kolommen: device_name, asr_office_macros_blocked.
+
+    Checklist 7.2 — Office-macros uit voor internet-bestanden (ASR-rule).
+    """
+    if not file.filename.lower().endswith(".csv"):
+        raise HTTPException(400, "Alleen CSV-upload")
+    content = (await file.read()).decode("utf-8-sig")
+    reader = csv.DictReader(io.StringIO(content))
+    required = {"device_name", "asr_office_macros_blocked"}
+    if not required.issubset(reader.fieldnames or []):
+        raise HTTPException(400, f"CSV mist verplichte kolommen: {required}")
+    total = 0
+    covered = 0
+    for row in reader:
+        total += 1
+        if _truthy(row.get("asr_office_macros_blocked", "")):
+            covered += 1
+    pct = f"{(covered / total * 100):.0f}%" if total else "n.v.t."
+    db.set_checklist_state(
+        "7.2",
+        "Office-macros uit voor internet-bestanden (ASR)",
+        measured_value=f"{covered}/{total} ({pct})",
+        target="100%",
+        notes=f"Upload {file.filename}; bron: Intune-export.",
+    )
+    return RedirectResponse("/checklist", status_code=303)

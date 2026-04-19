@@ -17,9 +17,31 @@ Voor checklist-item **1.1** — lijst kroonjuwelen.
 
 Upload via de pagina **Kroonjuwelen** in de UI.
 
-## Later toe te voegen
+## `intune-laps.csv`
 
-- `intune-laps-status.csv` — voor 3.4 (LAPS-dekking per device)
-- `intune-asr-rules.csv` — voor 7.2 (Office-macros ASR-status)
+Voor checklist-item **3.4** — LAPS op werkplekken + servers.
 
-Zodra de Intune-connector er is, zijn deze uploads niet meer nodig.
+| Kolom | Verplicht | Voorbeeld |
+|---|---|---|
+| `device_name` | ja | "WKS-001" |
+| `laps_configured` | ja | true / false |
+| `os` | nee | "Windows 11" |
+| `laps_last_rotation` | nee | "2026-04-17T08:12:00Z" |
+
+Upload via de pagina **Uploads** in de UI.
+
+## `intune-asr.csv`
+
+Voor checklist-item **7.2** — Office-macros uit (ASR-rule).
+
+| Kolom | Verplicht | Voorbeeld |
+|---|---|---|
+| `device_name` | ja | "WKS-001" |
+| `asr_office_macros_blocked` | ja | true / false |
+| `os` | nee | "Windows 11" |
+
+Upload via de pagina **Uploads** in de UI.
+
+## Na v0.1
+
+Zodra een Intune-connector er is, zijn deze uploads niet meer nodig — de tool pullt dan zelf.

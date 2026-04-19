@@ -1,0 +1,5 @@
+device_name,os,asr_office_macros_blocked
+WKS-001,Windows 11,true
+WKS-002,Windows 11,true
+WKS-003,Windows 10,false
+SRV-DB-01,Windows Server 2022,n/a

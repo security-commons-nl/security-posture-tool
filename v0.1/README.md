@@ -76,11 +76,21 @@ Dit pullt alle relevante data en overschrijft de Entra-bron-tabellen in SQLite. 
 
 ## Wat werkt er in dit skelet, en wat nog niet
 
-- Dataflow, routes, templates, DB-schema: **klaar**, draait out-of-the-box met dummy data
-- Graph API-calls in `entra.py`: **TODO-markers** — invullen tijdens eerste werksessie
-- Checklist-mappings in `checklist.py`: structuur klaar, meetlogica stubs
+- Dataflow, routes, templates, DB-schema: **klaar**, draait out-of-the-box
+- Graph API-calls in `entra.py`: **geschreven** met standaard endpoints (directoryRoles/members, userRegistrationDetails, signInActivity) — gemarkeerd "niet getest tegen live tenant", eerste echte run is de validatie
+- Meetlogica in `entra.py` (`_update_checklist_state`): **klaar** voor 3.1 en 3.5
+- CSV-upload voor kroonjuwelen (1.1), LAPS (3.4), ASR (7.2): **klaar**
+- Checklist-pagina toont status, target en laatste meting: **klaar**
 
-Zoek op `# TODO` voor alle invulpunten.
+Wat het team nog moet doen bij de eerste werksessie:
+
+1. Azure app-registration aanmaken met de Graph-scopes uit deze README
+2. `.env` invullen met `AZURE_TENANT_ID` / `AZURE_CLIENT_ID` / `AZURE_CLIENT_SECRET`
+3. App starten, op "Refresh Entra" klikken, eventuele Graph-fouten debuggen
+4. Kroonjuwelen-CSV uploaden (sample in `samples/crown-jewels.csv`)
+5. Intune-exports voor LAPS en ASR uploaden (samples in `samples/intune-laps.csv` en `samples/intune-asr.csv`)
+
+Zoek op `# NOTE` voor aandachtspunten en op `# TODO` voor eventuele resterende invulpunten.
 
 ## Geen compliance-tool
 
