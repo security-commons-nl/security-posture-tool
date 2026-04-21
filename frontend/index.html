@@ -86,12 +86,12 @@ h1{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
 </div>
 <script>
 const L=[
-{id:"core",label:"Kroonjuwelen",color:"#8957e5",r:[0,52]},
-{id:"data",label:"Data",color:"#1f6feb",r:[56,106]},
-{id:"application",label:"Applicatie",color:"#388bfd",r:[110,165]},
-{id:"endpoint",label:"Endpoint",color:"#d29922",r:[169,224]},
-{id:"network",label:"Netwerk",color:"#f0883e",r:[228,283]},
-{id:"perimeter",label:"Perimeter",color:"#f85149",r:[287,345]},
+{id:"core",label:"Kroonjuwelen",color:"#8957e5",r:[0,40]},
+{id:"data",label:"Data",color:"#1f6feb",r:[43,80]},
+{id:"application",label:"Applicatie",color:"#388bfd",r:[84,124]},
+{id:"endpoint",label:"Endpoint",color:"#d29922",r:[128,168]},
+{id:"network",label:"Netwerk",color:"#f0883e",r:[172,212]},
+{id:"perimeter",label:"Perimeter",color:"#f85149",r:[216,260]},
 ];
 const C=[
 {id:"fw",layer:"perimeter",label:"Firewall Regels",score:.35,status:"red",conn:"firewall_logs",bad:["43 any-any regels actief","Poort 3389 inbound niet geblokkeerd","Ruleset 6 jaar niet gereviewd"],ok:[]},
@@ -154,8 +154,8 @@ L.forEach(layer=>{
     }
   });
   svg.append("text").attr("class","rl")
-    .attr("transform","translate("+(CX+layer.r[1]+11)+","+CY+")")
-    .attr("dominant-baseline","middle").text(layer.label);
+    .attr("transform","translate("+CX+","+(CY-layer.r[1]-4)+")")
+    .attr("text-anchor","middle").text(layer.label);
 });
 let se=null;
 function show(ctrl,el){
