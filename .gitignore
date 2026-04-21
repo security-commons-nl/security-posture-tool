@@ -52,3 +52,6 @@ crash.log
 *.bak
 *.backup
 *.log
+
+# AI tooling
+.codesight/
