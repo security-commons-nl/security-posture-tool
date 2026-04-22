@@ -5,6 +5,11 @@
 > Geen audit-wizards ("Heb je een firewall? [x] Ja").
 > Wel operationeel inzicht ("Hier is bewijs van NMAP en Entra; uit 14.000 logs blijken nú 3 gapende gaten in je Perimeter en IAM.")
 
+
+[![Bijdragen](https://img.shields.io/badge/📝_Bijdragen-Open_een_bericht-238636?style=for-the-badge)](../../issues/new/choose) [![Discussions](https://img.shields.io/badge/💬_Discussions-Meepraten-0969da?style=for-the-badge)](../../discussions)
+
+👉 **Iets delen, feedback geven of een vraag stellen?** Klik op een van de knoppen hierboven — geen Git-ervaring nodig. Zie [CONTRIBUTING.md](CONTRIBUTING.md) voor meer opties.
+
 ## Wat is dit?
 Een open-source operationele applicatie ontworpen voor het blauwe team of interventieteams die snel tot de kern moeten komen. Waar trajecten zoals BIO, ISO of NIS2 vaak leiden tot theoretische compliance, maakt deze tool de *daadwerkelijke* technische werkelijkheid inzichtelijk per verdedigingslaag (Defense-in-Depth).
 
