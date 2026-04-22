@@ -32,3 +32,7 @@ De volwassen architectuur in `docs/architecture.md` en `docs/overview.html` komt
 
 ## Relatie met Bestuur & Compliance
 Voor beleid, risicomanagement en bestuurlijke compliance-rapportage is nadrukkelijk het afzonderlijke `grc-platform` bedoeld. Deze tool is bedoeld voor *handelen* in de operatie.
+
+## Bijdragen
+
+Zie [CONTRIBUTING.md](CONTRIBUTING.md) voor hoe je iets kan delen, melden of verbeteren — met of zonder Git-ervaring.

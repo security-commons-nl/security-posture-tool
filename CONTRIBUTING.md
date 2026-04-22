@@ -16,7 +16,7 @@ Vul alleen de vragen in die voor jou relevant zijn — we helpen je met de rest.
 
 ## 2. Meediscussiëren
 
-→ [**Discussions**](https://github.com/orgs/security-commons-nl/discussions)
+→ [**Discussions**](../../discussions)
 
 Voor vragen, ervaringen en ideeën zonder directe actie.
 
