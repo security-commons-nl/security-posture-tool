@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # Python-syntax- en install-check via herbruikbare workflow.
+  # test-command doet een py_compile want er zijn (nog) geen pytest-tests
+  # in v0.1/. Doel: vangen dat dependency-bumps geen install- of
+  # importbreuk veroorzaken.
+  v01-tests:
+    uses: security-commons-nl/.github/.github/workflows/python-ci.yml@main
+    with:
+      python-version: "3.12"
+      working-directory: "v0.1"
+      test-command: "python -m py_compile app.py checklist.py db.py drops.py entra.py"
+      install-extras: ""
