@@ -125,37 +125,58 @@ const C=[
 ];
 const SC={red:"#f85149",orange:"#d29922",green:"#3fb950",none:"#30363d"};
 const BC={perimeter:"#f85149",network:"#f0883e",endpoint:"#d29922",application:"#388bfd",data:"#1f6feb",core:"#8957e5"};
-const W=560,H=560,CX=W/2,CY=H/2;
+const W=620,H=560; // Slightly wider to comfortably fit the label + boxes
 const svg=d3.select("#svg").attr("width",W).attr("height",H);
-L.forEach(l=>{
-  svg.append("circle").attr("cx",CX).attr("cy",CY).attr("r",l.r[1])
-    .attr("fill","none").attr("stroke",l.color).attr("stroke-width",l.r[1]-l.r[0]-2).attr("stroke-opacity",.07);
-});
 const bl={};L.forEach(l=>{bl[l.id]=C.filter(c=>c.layer===l.id);});
-L.forEach(layer=>{
+const drawL = [...L].reverse(); // Draw from Perimeter downwards
+
+const layerH = 75; // height per layer
+const layerGap = 12; // gap between rows
+const labelW = 100;
+const blockW_total = W - labelW - 10;
+const startY = 24;
+
+drawL.forEach((layer, i) => {
   const cs=bl[layer.id];if(!cs.length)return;
-  const iR=layer.r[0]+2,oR=layer.r[1]-2,gap=layer.id==="core"?0:.028;
-  const ap=(2*Math.PI)/cs.length;
-  cs.forEach((ctrl,i)=>{
-    const sa=i*ap+gap/2-Math.PI/2,ea=(i+1)*ap-gap/2-Math.PI/2;
-    const arc=d3.arc().innerRadius(iR).outerRadius(oR).startAngle(sa).endAngle(ea);
-    svg.append("path").datum(ctrl).attr("class","seg")
-      .attr("d",arc).attr("transform","translate("+CX+","+CY+")")
-      .attr("fill",SC[ctrl.status]).attr("fill-opacity",ctrl.status==="none"?.35:.72)
-      .on("click",(ev,d)=>show(d,ev.currentTarget));
-    if(oR-iR>26){
-      const mid=(sa+ea)/2,mr=(iR+oR)/2;
-      const lns=ctrl.label.split(" ");
-      lns.forEach((ln,li,arr)=>{
-        svg.append("text").attr("class","cl")
-          .attr("transform","translate("+(CX+mr*Math.cos(mid))+","+(CY+mr*Math.sin(mid)+(li-(arr.length-1)/2)*10)+")")
-          .text(ln);
-      });
-    }
+  const y = startY + i * (layerH + layerGap);
+  
+  // Layer background tag
+  svg.append("rect")
+    .attr("x", 0).attr("y", y).attr("width", labelW - 10).attr("height", layerH)
+    .attr("fill", layer.color).attr("fill-opacity", 0.12)
+    .attr("rx", 6).attr("ry", 6)
+    .attr("stroke", layer.color).attr("stroke-width", 1.5);
+    
+  // Layer text label
+  svg.append("text").attr("class", "rl")
+    .attr("x", (labelW - 10) / 2).attr("y", y + layerH / 2)
+    .attr("fill", layer.color).style("fill", layer.color) // override CSS
+    .attr("text-anchor", "middle").attr("dominant-baseline", "middle")
+    .text(layer.label);
+    
+  // Draw controls in this layer row
+  const blockW = blockW_total / cs.length;
+  cs.forEach((ctrl, j) => {
+    const x = labelW + j * blockW;
+    const cw = blockW - 6; // gap between blocks
+    
+    // The interactive control block
+    svg.append("rect").datum(ctrl).attr("class", "seg")
+      .attr("x", x).attr("y", y).attr("width", cw).attr("height", layerH)
+      .attr("rx", 6).attr("ry", 6)
+      .attr("fill", SC[ctrl.status]).attr("fill-opacity", ctrl.status==="none"?.35:.72)
+      .on("click", (ev, d) => show(d, ev.currentTarget));
+      
+    // Multiline centering logic for text inside the block
+    const lns = ctrl.label.split(" ");
+    lns.forEach((ln, li, arr) => {
+      svg.append("text").attr("class", "cl")
+        .attr("x", x + cw / 2)
+        .attr("y", y + layerH / 2 + (li - (arr.length - 1) / 2) * 12)
+        .attr("dominant-baseline", "middle")
+        .text(ln);
+    });
   });
-  svg.append("text").attr("class","rl")
-    .attr("transform","translate("+CX+","+(CY-layer.r[1]-4)+")")
-    .attr("text-anchor","middle").text(layer.label);
 });
 let se=null;
 function show(ctrl,el){

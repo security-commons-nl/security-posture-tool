@@ -1,29 +1,87 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Checklist-voortgang</h1>
-<p>Subset van Week 1-items uit een cyber-hygiene-checklist voor gemeenten (BIO 2.0 / IBD-geïnspireerd).</p>
+<h1>Checklist — alle 37 items</h1>
+<p>Evidence-only: een item is pas gemeten als er een technisch artefact (API-response, export, log, config, rapport-PDF met hash+datum) is ingeladen. Zonder bewijs = grijs.</p>
+
+{% if categories %}
+<div class="section">
+  <h2>Dekking per categorie</h2>
+  {% for cat in categories %}
+  <div class="catcard">
+    <span class="name">{{ cat.name }}</span>
+    <span class="tally">
+      <span class="verdict pass">{{ cat.pass }}</span>
+      <span class="verdict fail">{{ cat.fail }}</span>
+      <span class="verdict stale">{{ cat.stale }}</span>
+      <span class="verdict unparsed">{{ cat.unparsed }}</span>
+      <span class="verdict none">{{ cat.none }}</span>
+    </span>
+    <small>{{ cat.total }} items</small>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if phases %}
+<div class="section">
+  <h2>Dekking per kill-chain-fase <small style="font-weight: normal; color: #666;">(Lockheed)</small></h2>
+  <p class="draftnote"><strong>DRAFT-mapping:</strong> de koppeling item → fase is een eerste voorzet. Te reviewen bij de eerstvolgende teamsessie. Een control die meerdere fases raakt, telt in elke fase mee.</p>
+  {% for ph in phases %}
+  <div class="phasecard {% if ph.key == 'meta' %}meta{% endif %}">
+    <span class="name">{{ ph.label }}</span>
+    <span class="tally">
+      <span class="verdict pass">{{ ph.pass }}</span>
+      <span class="verdict fail">{{ ph.fail }}</span>
+      <span class="verdict stale">{{ ph.stale }}</span>
+      <span class="verdict unparsed">{{ ph.unparsed }}</span>
+      <span class="verdict none">{{ ph.none }}</span>
+    </span>
+    <small>{{ ph.total }} items</small>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
 
 {% if checklist %}
+<h2>Alle items</h2>
 <table>
   <thead>
     <tr>
       <th>ID</th>
+      <th>Verdict</th>
       <th>Maatregel</th>
+      <th>Kill-chain</th>
       <th>Gemeten</th>
       <th>Doel</th>
-      <th>Laatst gemeten</th>
-      <th>Notitie</th>
+      <th>Artefact-datum</th>
+      <th>Parser</th>
+      <th>Evidence</th>
     </tr>
   </thead>
   <tbody>
   {% for c in checklist %}
     <tr>
       <td><code>{{ c.checklist_id }}</code></td>
+      <td>
+        {% if c.verdict %}
+          <span class="verdict {{ c.verdict }}">{{ c.verdict }}</span>
+        {% else %}
+          <span class="verdict none">geen bewijs</span>
+        {% endif %}
+      </td>
       <td>{{ c.label }}</td>
+      <td>
+        {% if c.kill_chain_phases %}
+          {% for lbl in c.kill_chain_labels %}<span class="phase">{{ lbl }}</span>{% endfor %}
+        {% else %}
+          <span class="phase meta">meta</span>
+        {% endif %}
+      </td>
       <td>{{ c.measured_value or "—" }}</td>
       <td>{{ c.target or "—" }}</td>
-      <td>{{ c.last_measured_at or "—" }}</td>
-      <td>{{ c.notes or "" }}</td>
+      <td>{{ c.artefact_date or "—" }}</td>
+      <td><code>{{ c.parser_name or "—" }}</code></td>
+      <td><a href="/evidence/{{ c.checklist_id }}">history</a></td>
     </tr>
   {% endfor %}
   </tbody>

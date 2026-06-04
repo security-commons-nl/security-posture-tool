@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Preview — kill-chain-dekking (mock)</title>
+<style>
+  body { font-family: system-ui, Arial, sans-serif; max-width: 1100px; margin: 1.5em auto; padding: 0 1em; color: #1a1a1a; }
+  nav { background: #2a4365; color: white; padding: 0.6em 1em; border-radius: 4px; margin-bottom: 1.2em; }
+  nav a { color: #bee3f8; text-decoration: none; margin-right: 1em; font-weight: 500; }
+  nav a.active { color: white; border-bottom: 2px solid white; padding-bottom: 2px; }
+  h1 { font-size: 1.5em; margin-bottom: 0.4em; }
+  h2 { font-size: 1.1em; border-bottom: 1px solid #ccc; padding-bottom: 0.2em; margin-top: 1.4em; }
+  table { border-collapse: collapse; width: 100%; margin: 0.6em 0; font-size: 0.9em; }
+  th { background: #2a4365; color: white; text-align: left; padding: 0.4em 0.6em; }
+  td { border-bottom: 1px solid #ddd; padding: 0.4em 0.6em; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8f9fa; }
+  .card { background: #f3f6fa; border-left: 4px solid #2a4365; padding: 0.8em 1em; margin: 0.8em 0; font-size: 0.9em; }
+  button, .btn { background: #2a4365; color: white; border: none; padding: 0.45em 0.9em; border-radius: 3px; cursor: pointer; font-size: 0.9em; font-family: inherit; text-decoration: none; display: inline-block; }
+  form.inline { display: inline; }
+  code { background: #eef1f5; padding: 0.1em 0.35em; border-radius: 2px; font-size: 0.85em; }
+  .kpi { display: inline-block; background: white; border: 1px solid #ccc; padding: 0.5em 0.8em; margin-right: 0.6em; border-radius: 3px; font-size: 0.88em; }
+  .kpi strong { color: #2a4365; font-size: 1.3em; display: block; }
+  .verdict { display: inline-block; padding: 0.15em 0.55em; border-radius: 3px; font-size: 0.8em; font-weight: 600; color: white; }
+  .verdict.pass { background: #2f855a; }
+  .verdict.fail { background: #c53030; }
+  .verdict.stale { background: #c05621; }
+  .verdict.unparsed { background: #718096; }
+  .verdict.none { background: #cbd5e0; color: #2d3748; }
+  .catcard { display: inline-block; background: white; border: 1px solid #ccc; padding: 0.5em 0.7em; margin: 0.3em 0.3em 0.3em 0; border-radius: 3px; font-size: 0.82em; vertical-align: top; min-width: 180px; }
+  .catcard .name { font-weight: 600; color: #2a4365; display: block; margin-bottom: 0.3em; }
+  .catcard .tally span { margin-right: 0.4em; }
+  .phase { display: inline-block; background: #edf2f7; color: #2d3748; padding: 0.12em 0.4em; border-radius: 2px; font-size: 0.72em; margin: 0 0.15em 0.15em 0; border: 1px solid #cbd5e0; }
+  .phase.meta { background: #faf5ff; border-color: #d6bcfa; color: #553c9a; }
+  .phasecard { display: inline-block; background: white; border: 1px solid #ccc; padding: 0.5em 0.7em; margin: 0.3em 0.3em 0.3em 0; border-radius: 3px; font-size: 0.82em; vertical-align: top; min-width: 150px; }
+  .phasecard .name { font-weight: 600; color: #2a4365; display: block; margin-bottom: 0.3em; font-size: 0.88em; }
+  .phasecard .tally span { margin-right: 0.4em; }
+  .phasecard.meta .name { color: #553c9a; }
+  .draftnote { background: #fffaf0; border-left: 4px solid #dd6b20; padding: 0.5em 0.8em; margin: 0.5em 0; font-size: 0.82em; color: #744210; }
+  .mocklabel { background: #fef3c7; color: #78350f; padding: 0.2em 0.6em; border-radius: 2px; font-size: 0.7em; font-weight: 600; margin-left: 0.4em; }
+</style>
+</head>
+<body>
+<nav>
+  <a href="#" class="active">Overzicht</a>
+  <a href="#">Checklist</a>
+  <a href="#">MFA</a>
+  <a href="#">Inactief</a>
+  <a href="#">Kroonjuwelen</a>
+  <a href="#">Uploads</a>
+  <a href="#">Drops</a>
+</nav>
+
+<h1>Overzicht <span class="mocklabel">MOCK / PREVIEW — geen echte data</span></h1>
+
+<div>
+  <span class="kpi"><strong>1 247</strong> accounts</span>
+  <span class="kpi"><strong>18</strong> privileged</span>
+  <span class="kpi"><strong>12</strong> kroonjuwelen</span>
+</div>
+
+<div class="card">
+  <strong>Evidence-only model.</strong> 37 maatregelen uit de cyber-hygiene-checklist.
+  Een item is pas "gemeten" als de tool een technisch artefact kan inspecteren —
+  Graph-API-pull, CSV-export, firewall-config, scan-rapport of PDF met hash+datum.
+  Zonder artefact: grijs.
+</div>
+
+<h2>Dekking per categorie</h2>
+<div>
+  <div class="catcard"><span class="name">1 Inventaris &amp; kroonjuwelen</span><span class="tally"><span class="verdict pass">1</span><span class="verdict fail">1</span><span class="verdict stale">0</span><span class="verdict unparsed">0</span><span class="verdict none">1</span></span><small>3 items</small></div>
+  <div class="catcard"><span class="name">2 Segmentatie</span><span class="tally"><span class="verdict pass">1</span><span class="verdict fail">1</span><span class="verdict stale">0</span><span class="verdict unparsed">0</span><span class="verdict none">3</span></span><small>5 items</small></div>
+  <div class="catcard"><span class="name">3 Identity &amp; toegang</span><span class="tally"><span class="verdict pass">2</span><span class="verdict fail">1</span><span class="verdict stale">0</span><span class="verdict unparsed">0</span><span class="verdict none">2</span></span><small>5 items</small></div>
+  <div class="catcard"><span class="name">4 Monitoring &amp; logging</span><span class="tally"><span class="verdict pass">1</span><span class="verdict fail">1</span><span class="verdict stale">0</span><span class="verdict unparsed">0</span><span class="verdict none">4</span></span><small>6 items</small></div>
+  <div class="catcard"><span class="name">5 Patching &amp; vulnerability</span><span class="tally"><span class="verdict pass">0</span><span class="verdict fail">0</span><span class="verdict stale">1</span><span class="verdict unparsed">0</span><span class="verdict none">3</span></span><small>4 items</small></div>
+  <div class="catcard"><span class="name">6 Backup &amp; recovery</span><span class="tally"><span class="verdict pass">1</span><span class="verdict fail">0</span><span class="verdict stale">1</span><span class="verdict unparsed">0</span><span class="verdict none">1</span></span><small>3 items</small></div>
+  <div class="catcard"><span class="name">7 Werkplek-hardening</span><span class="tally"><span class="verdict pass">1</span><span class="verdict fail">1</span><span class="verdict stale">0</span><span class="verdict unparsed">0</span><span class="verdict none">2</span></span><small>4 items</small></div>
+  <div class="catcard"><span class="name">8 AI-specifiek (feitelijk)</span><span class="tally"><span class="verdict pass">0</span><span class="verdict fail">1</span><span class="verdict stale">0</span><span class="verdict unparsed">0</span><span class="verdict none">3</span></span><small>4 items</small></div>
+  <div class="catcard"><span class="name">9 Governance</span><span class="tally"><span class="verdict pass">1</span><span class="verdict fail">0</span><span class="verdict stale">1</span><span class="verdict unparsed">0</span><span class="verdict none">1</span></span><small>3 items</small></div>
+</div>
+
+<h2>Dekking per kill-chain-fase <small style="font-weight: normal; color: #666;">(Lockheed, DRAFT-mapping)</small></h2>
+<div>
+  <div class="phasecard"><span class="name">Reconnaissance</span><span class="tally"><span class="verdict pass">0</span><span class="verdict fail">0</span><span class="verdict stale">1</span><span class="verdict unparsed">0</span><span class="verdict none">1</span></span><small>2 items</small></div>
+  <div class="phasecard"><span class="name">Weaponization</span><span class="tally"><span class="verdict pass">0</span><span class="verdict fail">0</span><span class="verdict stale">0</span><span class="verdict unparsed">0</span><span class="verdict none">0</span></span><small>0 items</small></div>
+  <div class="phasecard"><span class="name">Delivery</span><span class="tally"><span class="verdict pass">4</span><span class="verdict fail">2</span><span class="verdict stale">0</span><span class="verdict unparsed">0</span><span class="verdict none">4</span></span><small>10 items</small></div>
+  <div class="phasecard"><span class="name">Exploitation</span><span class="tally"><span class="verdict pass">3</span><span class="verdict fail">3</span><span class="verdict stale">0</span><span class="verdict unparsed">0</span><span class="verdict none">9</span></span><small>15 items</small></div>
+  <div class="phasecard"><span class="name">Installation</span><span class="tally"><span class="verdict pass">1</span><span class="verdict fail">3</span><span class="verdict stale">0</span><span class="verdict unparsed">0</span><span class="verdict none">11</span></span><small>15 items</small></div>
+  <div class="phasecard"><span class="name">Command &amp; Control</span><span class="tally"><span class="verdict pass">1</span><span class="verdict fail">1</span><span class="verdict stale">0</span><span class="verdict unparsed">0</span><span class="verdict none">7</span></span><small>9 items</small></div>
+  <div class="phasecard"><span class="name">Actions on Objectives</span><span class="tally"><span class="verdict pass">2</span><span class="verdict fail">1</span><span class="verdict stale">1</span><span class="verdict unparsed">0</span><span class="verdict none">8</span></span><small>12 items</small></div>
+  <div class="phasecard meta"><span class="name">Meta / governance</span><span class="tally"><span class="verdict pass">2</span><span class="verdict fail">1</span><span class="verdict stale">1</span><span class="verdict unparsed">0</span><span class="verdict none">2</span></span><small>6 items</small></div>
+</div>
+
+<h2>Acties</h2>
+<p>
+  <form class="inline" method="post"><button type="submit">Refresh Entra (3.1, 3.5, 4.3, 8.1)</button></form>
+  <a class="btn" href="#">Upload bewijs</a>
+  <a class="btn" href="#">Bekijk checklist</a>
+</p>
+
+<h1 style="margin-top: 2em;">Checklist — alle 37 items <span class="mocklabel">MOCK / PREVIEW</span></h1>
+
+<p class="draftnote"><strong>DRAFT-mapping:</strong> de koppeling item → fase is een eerste voorzet. Te reviewen bij de eerstvolgende teamsessie. Een control die meerdere fases raakt, telt in elke fase mee.</p>
+
+<h2>Alle items <small style="font-weight: normal; color: #666;">(tonen: eerste 10 van 37)</small></h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Verdict</th>
+      <th>Maatregel</th>
+      <th>Kill-chain</th>
+      <th>Gemeten</th>
+      <th>Doel</th>
+      <th>Artefact-datum</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>1.1</code></td>
+      <td><span class="verdict pass">pass</span></td>
+      <td>Kroonjuwelenlijst (max 20, met eigenaar)</td>
+      <td><span class="phase meta">meta</span></td>
+      <td>12 items, 100% met eigenaar</td>
+      <td>≥1 item, 100% naam + eigenaar</td>
+      <td>2026-04-18</td>
+    </tr>
+    <tr>
+      <td><code>1.2</code></td>
+      <td><span class="verdict fail">fail</span></td>
+      <td>Per kroonjuweel: VLAN, backup-type, RTO/RPO</td>
+      <td><span class="phase meta">meta</span></td>
+      <td>10/12 juwelen volledig</td>
+      <td>100% alle kolommen</td>
+      <td>2026-04-18</td>
+    </tr>
+    <tr>
+      <td><code>2.3</code></td>
+      <td><span class="verdict fail">fail</span></td>
+      <td>Mgmt-zone gesplitst, geen any-any</td>
+      <td><span class="phase">Installation</span><span class="phase">C2</span><span class="phase">Actions</span></td>
+      <td>3 any-any regels</td>
+      <td>0 any-any in mgmt</td>
+      <td>2026-04-19</td>
+    </tr>
+    <tr>
+      <td><code>2.4</code></td>
+      <td><span class="verdict pass">pass</span></td>
+      <td>Gast-WiFi volledig gescheiden</td>
+      <td><span class="phase">Delivery</span><span class="phase">Installation</span></td>
+      <td>Drop op gast→intern</td>
+      <td>Traceroute: drop</td>
+      <td>2026-04-19</td>
+    </tr>
+    <tr>
+      <td><code>3.1</code></td>
+      <td><span class="verdict pass">pass</span></td>
+      <td>MFA verplicht: admin + externe + kroonjuweel</td>
+      <td><span class="phase">Delivery</span><span class="phase">Exploitation</span></td>
+      <td>100% CA-dekking (18/18)</td>
+      <td>100% CA-dekking</td>
+      <td>2026-04-20</td>
+    </tr>
+    <tr>
+      <td><code>3.4</code></td>
+      <td><span class="verdict fail">fail</span></td>
+      <td>LAPS op alle werkplekken + servers</td>
+      <td><span class="phase">Installation</span></td>
+      <td>92% dekking (1 147/1 247)</td>
+      <td>100% recente LAPS-ts</td>
+      <td>2026-04-20</td>
+    </tr>
+    <tr>
+      <td><code>4.3</code></td>
+      <td><span class="verdict fail">fail</span></td>
+      <td>Entra + AD sign-in + risky sign-ins</td>
+      <td><span class="phase">Delivery</span><span class="phase">Exploitation</span></td>
+      <td>2 uitstaand (&gt;24u)</td>
+      <td>0 uitstaand</td>
+      <td>2026-04-20</td>
+    </tr>
+    <tr>
+      <td><code>5.4</code></td>
+      <td><span class="verdict stale">stale</span></td>
+      <td>Wekelijkse externe scan</td>
+      <td><span class="phase">Reconnaissance</span></td>
+      <td>Laatste scan 14d oud</td>
+      <td>Scan &lt;7d, 0 nieuwe poorten</td>
+      <td>2026-04-06</td>
+    </tr>
+    <tr>
+      <td><code>7.3</code></td>
+      <td><span class="verdict fail">fail</span></td>
+      <td>Geen lokale admin voor users</td>
+      <td><span class="phase">Exploitation</span><span class="phase">Installation</span></td>
+      <td>47 users in local Admins</td>
+      <td>0 users</td>
+      <td>2026-04-19</td>
+    </tr>
+    <tr>
+      <td><code>8.1</code></td>
+      <td><span class="verdict fail">fail</span></td>
+      <td>Phishing-resistant MFA admins (FIDO2/WHfB)</td>
+      <td><span class="phase">Delivery</span><span class="phase">Exploitation</span></td>
+      <td>22% (4/18 admins)</td>
+      <td>100% FIDO2/WHfB</td>
+      <td>2026-04-20</td>
+    </tr>
+  </tbody>
+</table>
+
+</body>
+</html>
