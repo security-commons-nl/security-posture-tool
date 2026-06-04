@@ -1,44 +1,87 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>security-posture-tool — v0.1</h1>
-<p>Data-verzamelende MVP. Meet een subset van Week 1-items uit de cyber-hygiene-checklist.</p>
+<h1>Overzicht</h1>
 
 <div>
-  <span class="kpi"><strong>{{ total_accounts }}</strong>accounts in DB</span>
-  <span class="kpi"><strong>{{ total_privileged }}</strong>privileged</span>
-  <span class="kpi"><strong>{{ total_crown_jewels }}</strong>kroonjuwelen</span>
+  <span class="kpi"><strong>{{ total_accounts }}</strong> accounts</span>
+  <span class="kpi"><strong>{{ total_privileged }}</strong> privileged</span>
+  <span class="kpi"><strong>{{ total_crown_jewels }}</strong> kroonjuwelen</span>
 </div>
 
-<h2>Checklist-voortgang</h2>
+<div class="card">
+  <strong>Evidence-only model.</strong> 37 maatregelen uit de cyber-hygiene-checklist.
+  Een item is pas "gemeten" als de tool een technisch artefact kan inspecteren —
+  Graph-API-pull, CSV-export, firewall-config, scan-rapport of PDF met hash+datum.
+  Zonder artefact: grijs.
+</div>
+
+<h2>Dekking per categorie</h2>
+<div>
+  {% for cat in categories %}
+  <div class="catcard">
+    <span class="name">{{ cat.name }}</span>
+    <span class="tally">
+      <span class="verdict pass" title="pass">{{ cat.pass }}</span>
+      <span class="verdict fail" title="fail">{{ cat.fail }}</span>
+      <span class="verdict stale" title="stale">{{ cat.stale }}</span>
+      <span class="verdict unparsed" title="unparsed">{{ cat.unparsed }}</span>
+      <span class="verdict none" title="geen bewijs">{{ cat.none }}</span>
+    </span>
+    <small>{{ cat.total }} items</small>
+  </div>
+  {% endfor %}
+</div>
+
+{% if phases %}
+<h2>Dekking per kill-chain-fase <small style="font-weight: normal; color: #666;">(Lockheed, DRAFT-mapping)</small></h2>
+<div>
+  {% for ph in phases %}
+  <div class="phasecard {% if ph.key == 'meta' %}meta{% endif %}">
+    <span class="name">{{ ph.label }}</span>
+    <span class="tally">
+      <span class="verdict pass" title="pass">{{ ph.pass }}</span>
+      <span class="verdict fail" title="fail">{{ ph.fail }}</span>
+      <span class="verdict stale" title="stale">{{ ph.stale }}</span>
+      <span class="verdict unparsed" title="unparsed">{{ ph.unparsed }}</span>
+      <span class="verdict none" title="geen bewijs">{{ ph.none }}</span>
+    </span>
+    <small>{{ ph.total }} items</small>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<h2>Acties</h2>
+<p>
+  <form class="inline" method="post" action="/entra/refresh">
+    <button type="submit">Refresh Entra (3.1, 3.5, 4.3, 8.1)</button>
+  </form>
+  <a class="btn" href="/uploads">Upload bewijs</a>
+  <a class="btn" href="/checklist">Bekijk checklist</a>
+</p>
+
 {% if checklist %}
+<h2>Nieuwste meting per item</h2>
 <table>
-  <thead><tr><th>ID</th><th>Maatregel</th><th>Gemeten</th><th>Doel</th><th>Laatst</th></tr></thead>
+  <thead>
+    <tr><th>ID</th><th>Verdict</th><th>Maatregel</th><th>Gemeten</th></tr>
+  </thead>
   <tbody>
   {% for c in checklist %}
     <tr>
       <td><code>{{ c.checklist_id }}</code></td>
-      <td>{{ c.label }}</td>
-      <td>{{ c.measured_value or "nog niet gemeten" }}</td>
-      <td>{{ c.target or "—" }}</td>
-      <td>{{ c.last_measured_at or "—" }}</td>
+      <td>
+        {% if c.verdict %}
+          <span class="verdict {{ c.verdict }}">{{ c.verdict }}</span>
+        {% else %}
+          <span class="verdict none">—</span>
+        {% endif %}
+      </td>
+      <td><a href="/evidence/{{ c.checklist_id }}">{{ c.label }}</a></td>
+      <td>{{ c.measured_value or "—" }}</td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
-{% else %}
-<p class="empty">Nog geen checklist-items geladen.</p>
 {% endif %}
-
-<h2>Data verzamelen</h2>
-<div class="card">
-  <form class="inline" method="post" action="/entra/refresh">
-    <button type="submit">Refresh Entra</button>
-  </form>
-  &nbsp; trekt privileged accounts + MFA-status + sign-in-activity uit de
-  Microsoft Graph API.
-</div>
-<div class="card">
-  Ga naar <a href="/crown-jewels">Kroonjuwelen</a> om een CSV met de
-  organisatie-kroonjuwelenlijst te uploaden.
-</div>
 {% endblock %}

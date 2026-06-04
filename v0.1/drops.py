@@ -19,7 +19,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DROPS_PATH = Path(os.environ.get("DROPS_PATH", "drops")).resolve()
+def _drops_path() -> Path:
+    return Path(os.environ.get("DROPS_PATH", "drops")).resolve()
+
+
+# Backwards-compat attribute voor code die db.DROPS_PATH verwacht
+DROPS_PATH = _drops_path()
 
 TEXT_EXT = {".txt", ".log", ".conf", ".cfg", ".md", ".json", ".xml", ".yaml", ".yml", ".ini"}
 CSV_EXT = {".csv", ".tsv"}
@@ -29,10 +34,11 @@ PREVIEW_ROWS = 200         # max 200 CSV rows preview
 
 def list_drops() -> list[dict]:
     """Lijst alle bestanden (recursief) onder DROPS_PATH, sorteren op mtime desc."""
-    if not DROPS_PATH.exists():
+    root = _drops_path()
+    if not root.exists():
         return []
     out: list[dict] = []
-    for p in DROPS_PATH.rglob("*"):
+    for p in root.rglob("*"):
         if p.is_dir():
             continue
         if p.name.lower() == "readme.md":
@@ -44,7 +50,7 @@ def list_drops() -> list[dict]:
         except OSError:
             continue
         out.append({
-            "path": str(p.relative_to(DROPS_PATH)).replace("\\", "/"),
+            "path": str(p.relative_to(root)).replace("\\", "/"),
             "name": p.name,
             "size": stat.st_size,
             "size_human": _human_size(stat.st_size),
@@ -58,10 +64,11 @@ def list_drops() -> list[dict]:
 
 def read_drop(relpath: str) -> dict | None:
     """Lees een bestand veilig binnen DROPS_PATH. Retourneert None als onbekend."""
-    target = (DROPS_PATH / relpath).resolve()
+    root = _drops_path()
+    target = (root / relpath).resolve()
     # Voorkom path-traversal
     try:
-        target.relative_to(DROPS_PATH)
+        target.relative_to(root)
     except ValueError:
         raise ValueError("Path buiten DROPS_PATH")
     if not target.exists() or not target.is_file():

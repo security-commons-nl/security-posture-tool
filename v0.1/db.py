@@ -13,7 +13,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DB_PATH = Path(os.environ.get("DB_PATH", "posture.sqlite"))
+
+def _db_path() -> Path:
+    """Lees DB_PATH lazily zodat tests de env-var kunnen overriden."""
+    return Path(os.environ.get("DB_PATH", "posture.sqlite"))
+
+
+# Backwards-compat: veel code verwijst naar db.DB_PATH. Geef nog steeds iets
+# terug, maar bij test-override geldt _db_path().
+DB_PATH = _db_path()
 
 
 SCHEMA = """
@@ -49,12 +57,28 @@ CREATE TABLE IF NOT EXISTS checklist_state (
     last_measured_at TEXT,
     notes TEXT
 );
+
+CREATE TABLE IF NOT EXISTS evidence (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    checklist_id TEXT NOT NULL,
+    source_type TEXT NOT NULL,
+    source_ref TEXT NOT NULL,
+    sha256 TEXT NOT NULL,
+    collected_at TEXT NOT NULL,
+    artefact_date TEXT,
+    parsed_summary TEXT,
+    parser_name TEXT,
+    verdict TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_evidence_checklist
+    ON evidence(checklist_id, collected_at DESC);
 """
 
 
 @contextmanager
 def connect():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(_db_path())
     conn.row_factory = sqlite3.Row
     try:
         yield conn
@@ -66,7 +90,7 @@ def connect():
 def init():
     with connect() as conn:
         conn.executescript(SCHEMA)
-    print(f"Database geïnitialiseerd op {DB_PATH.resolve()}")
+    print(f"Database geïnitialiseerd op {_db_path().resolve()}")
 
 
 def upsert_account(row: dict):
@@ -114,6 +138,11 @@ def insert_crown_jewel(row: dict):
         )
 
 
+def reset_crown_jewels():
+    with connect() as conn:
+        conn.execute("DELETE FROM crown_jewels")
+
+
 def set_checklist_state(checklist_id: str, label: str, measured_value: str,
                        target: str, notes: str = ""):
     with connect() as conn:
@@ -138,6 +167,42 @@ def set_checklist_state(checklist_id: str, label: str, measured_value: str,
                 notes,
             ),
         )
+
+
+def insert_evidence(row: dict):
+    """Schrijf een evidence-rij. Altijd INSERT (append-only log)."""
+    with connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO evidence (checklist_id, source_type, source_ref, sha256,
+                                  collected_at, artefact_date, parsed_summary,
+                                  parser_name, verdict)
+            VALUES (:checklist_id, :source_type, :source_ref, :sha256,
+                    :collected_at, :artefact_date, :parsed_summary,
+                    :parser_name, :verdict)
+            """,
+            row,
+        )
+
+
+def fetch_latest_evidence(checklist_id: str):
+    with connect() as conn:
+        r = conn.execute(
+            "SELECT * FROM evidence WHERE checklist_id=? "
+            "ORDER BY collected_at DESC, id DESC LIMIT 1",
+            (checklist_id,),
+        ).fetchone()
+    return dict(r) if r else None
+
+
+def fetch_evidence_for(checklist_id: str, limit: int = 20):
+    with connect() as conn:
+        rows = conn.execute(
+            "SELECT * FROM evidence WHERE checklist_id=? "
+            "ORDER BY collected_at DESC, id DESC LIMIT ?",
+            (checklist_id, limit),
+        ).fetchall()
+    return [dict(r) for r in rows]
 
 
 def fetch_accounts(privileged_only: bool = False):

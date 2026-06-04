@@ -1,14 +1,20 @@
-"""Microsoft Graph API client — v0.1 skelet.
+"""Microsoft Graph API client — evidence-only refactor.
 
-Haalt privileged accounts, MFA-status en sign-in activity op uit Entra ID.
-De Graph-calls zijn gestubt met TODO-markers; invullen tijdens eerste werksessie.
+Haalt privileged accounts, MFA-status, sign-in activity, risky sign-ins en
+authentication-methods op uit Entra ID. Elke pull schrijft een evidence-rij
+voor het corresponderende checklist-item:
+  3.1 — MFA privileged
+  3.5 — Inactieve accounts
+  4.3 — Risky sign-ins
+  8.1 — Phishing-resistant MFA onder admins
 """
 
 from __future__ import annotations
 
+import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Iterable
 
 import httpx
@@ -16,28 +22,39 @@ from dotenv import load_dotenv
 from msal import ConfidentialClientApplication
 
 import db
+import evidence
 
 load_dotenv()
 
-TENANT_ID = os.environ.get("AZURE_TENANT_ID", "")
-CLIENT_ID = os.environ.get("AZURE_CLIENT_ID", "")
-CLIENT_SECRET = os.environ.get("AZURE_CLIENT_SECRET", "")
-
-AUTHORITY = f"https://login.microsoftonline.com/{TENANT_ID}"
+AUTHORITY_TEMPLATE = "https://login.microsoftonline.com/{tenant}"
 SCOPE = ["https://graph.microsoft.com/.default"]
 GRAPH = "https://graph.microsoft.com/v1.0"
 
+PHISHING_RESISTANT_TYPES = {
+    "#microsoft.graph.fido2AuthenticationMethod",
+    "#microsoft.graph.windowsHelloForBusinessAuthenticationMethod",
+    "#microsoft.graph.x509CertificateAuthenticationMethod",
+}
 
-def _token() -> str:
-    if not all([TENANT_ID, CLIENT_ID, CLIENT_SECRET]):
+
+def _env() -> tuple[str, str, str]:
+    tenant = os.environ.get("AZURE_TENANT_ID", "")
+    client = os.environ.get("AZURE_CLIENT_ID", "")
+    secret = os.environ.get("AZURE_CLIENT_SECRET", "")
+    if not all([tenant, client, secret]):
         raise RuntimeError(
             "Missing AZURE_TENANT_ID / AZURE_CLIENT_ID / AZURE_CLIENT_SECRET — "
             "zie .env.example"
         )
+    return tenant, client, secret
+
+
+def _token() -> str:
+    tenant, client, secret = _env()
     app = ConfidentialClientApplication(
-        CLIENT_ID,
-        authority=AUTHORITY,
-        client_credential=CLIENT_SECRET,
+        client,
+        authority=AUTHORITY_TEMPLATE.format(tenant=tenant),
+        client_credential=secret,
     )
     res = app.acquire_token_for_client(scopes=SCOPE)
     if "access_token" not in res:
@@ -45,26 +62,28 @@ def _token() -> str:
     return res["access_token"]
 
 
-def _graph_get(path: str, params: dict | None = None) -> dict:
+def _graph_get(path: str, params: dict | None = None, token: str | None = None) -> dict:
+    token = token or _token()
     with httpx.Client(timeout=30) as client:
         r = client.get(
             f"{GRAPH}{path}",
             params=params or {},
-            headers={"Authorization": f"Bearer {_token()}"},
+            headers={"Authorization": f"Bearer {token}"},
         )
         r.raise_for_status()
         return r.json()
 
 
-def _graph_paged(path: str, params: dict | None = None) -> Iterable[dict]:
-    """Iterate over alle pagina's van een Graph-list-response."""
+def _graph_paged(path: str, params: dict | None = None,
+                 token: str | None = None) -> Iterable[dict]:
+    token = token or _token()
     url = f"{GRAPH}{path}"
-    token = _token()
     with httpx.Client(timeout=30) as client:
+        first = True
         while url:
             r = client.get(
                 url,
-                params=params if url == f"{GRAPH}{path}" else None,
+                params=params if first else None,
                 headers={"Authorization": f"Bearer {token}"},
             )
             r.raise_for_status()
@@ -72,23 +91,15 @@ def _graph_paged(path: str, params: dict | None = None) -> Iterable[dict]:
             for item in data.get("value", []):
                 yield item
             url = data.get("@odata.nextLink")
+            first = False
 
 
 # ---------------------------------------------------------------------------
-# De eigenlijke pulls — TODO tijdens eerste werksessie invullen
+# Pulls
 # ---------------------------------------------------------------------------
 
 
 def fetch_privileged_accounts() -> list[dict]:
-    """Haal accounts op die lid zijn van één of meer directory-roles.
-
-    Strategie: GET /directoryRoles → per role GET /members → dedupliceer op
-    user-id. Dit pakt alle accounts die ten minste één admin-role hebben
-    (Global Admin, Security Admin, User Admin, enz.). Als een strakkere
-    definitie gewenst is, filter hier op role-template-id.
-
-    NOTE: niet getest tegen live tenant; ronde dit af bij eerste run.
-    """
     seen: dict[str, dict] = {}
     for role in _graph_paged("/directoryRoles"):
         role_id = role["id"]
@@ -110,15 +121,10 @@ def fetch_privileged_accounts() -> list[dict]:
 
 
 def fetch_mfa_registrations() -> dict[str, dict]:
-    """Per user-id de MFA-registratiestatus.
-
-    Graph endpoint: /reports/authenticationMethods/userRegistrationDetails
-    Levert per user o.a. isMfaRegistered + methodsRegistered.
-
-    NOTE: vereist Reports.Read.All in app-registration.
-    """
     out: dict[str, dict] = {}
-    for rec in _graph_paged("/reports/authenticationMethods/userRegistrationDetails"):
+    for rec in _graph_paged(
+        "/reports/authenticationMethods/userRegistrationDetails"
+    ):
         uid = rec.get("id")
         if not uid:
             continue
@@ -130,17 +136,14 @@ def fetch_mfa_registrations() -> dict[str, dict]:
 
 
 def fetch_last_signin(user_ids: Iterable[str]) -> dict[str, str | None]:
-    """Per user-id de ISO-timestamp van de laatste sign-in.
-
-    Graph endpoint: /users/{id}?$select=signInActivity
-    Vereist Entra ID P1/P2 (anders is signInActivity leeg).
-    """
     out: dict[str, str | None] = {}
+    token = _token()
     for uid in user_ids:
         try:
             data = _graph_get(
                 f"/users/{uid}",
                 params={"$select": "id,signInActivity"},
+                token=token,
             )
         except httpx.HTTPError as e:
             print(f"  waarschuwing: sign-in van {uid}: {e}")
@@ -151,16 +154,31 @@ def fetch_last_signin(user_ids: Iterable[str]) -> dict[str, str | None]:
     return out
 
 
+def fetch_risky_signins(window_days: int = 7) -> list[dict]:
+    """Alle sign-ins met riskLevelAggregated != 'none' in laatste N dagen."""
+    from datetime import timedelta
+    since = (datetime.now(timezone.utc) - timedelta(days=window_days)).isoformat()
+    filt = f"riskLevelAggregated ne 'none' and createdDateTime ge {since}"
+    return list(_graph_paged("/auditLogs/signIns",
+                             params={"$filter": filt, "$top": 100}))
+
+
+def fetch_auth_methods(user_id: str) -> list[dict]:
+    data = _graph_get(f"/users/{user_id}/authentication/methods")
+    return data.get("value", [])
+
+
 # ---------------------------------------------------------------------------
-# Orchestrator
+# Orchestrator — schrijft evidence-rijen
 # ---------------------------------------------------------------------------
 
 
 def refresh():
-    """Pull alles, schrijf naar SQLite, update checklist-state."""
+    """Volledige pull: accounts + MFA + sign-ins + risky + authmethods-admins."""
+    now_iso = datetime.now(timezone.utc).isoformat()
+
     print("Privileged accounts ophalen...")
     privileged = fetch_privileged_accounts()
-    print(f"  → {len(privileged)} privileged accounts")
 
     print("MFA-registraties ophalen...")
     mfa = fetch_mfa_registrations()
@@ -182,33 +200,75 @@ def refresh():
             "source": "entra",
         })
 
-    _update_checklist_state(privileged, mfa)
-    print("Klaar.")
-
-
-def _update_checklist_state(privileged: list[dict], mfa: dict[str, dict]):
-    total = len(privileged)
-    covered = sum(1 for a in privileged if mfa.get(a["id"], {}).get("mfa_registered"))
-    pct = f"{(covered / total * 100):.0f}%" if total else "n.v.t."
-    db.set_checklist_state(
-        "3.1",
-        "MFA verplicht op admin-accounts",
-        measured_value=f"{covered}/{total} ({pct})",
-        target="100%",
-        notes="Gemeten op privileged accounts (directory-role members).",
+    # 3.1 — MFA privileged
+    total_priv = len(privileged)
+    mfa_covered = sum(1 for a in privileged
+                      if mfa.get(a["id"], {}).get("mfa_registered"))
+    body_31 = json.dumps({"privileged": privileged, "mfa": mfa},
+                         sort_keys=True, default=str).encode("utf-8")
+    evidence.write_evidence(
+        checklist_id="3.1", source_type="graph_api",
+        source_ref=f"graph:mfa-privileged:{now_iso}",
+        raw_bytes=body_31, artefact_date=now_iso,
+        parsed_summary={"total": total_priv, "covered": mfa_covered,
+                        "pct": round(mfa_covered/total_priv*100) if total_priv else 0},
+        parser_name="graph_mfa_privileged_v1",
+        verdict="pass" if total_priv and mfa_covered == total_priv else "fail",
     )
 
+    # 3.5 — Inactieve accounts (>90d) + enabled
     inactive = db.fetch_inactive_accounts(90)
-    db.set_checklist_state(
-        "3.5",
-        "Inactieve accounts >90 dagen",
-        measured_value=f"{len(inactive)} accounts",
-        target="0 (of auto-disabled)",
-        notes="Gebaseerd op signInActivity.lastSignInDateTime.",
+    body_35 = json.dumps({"inactive_count": len(inactive)},
+                         sort_keys=True, default=str).encode("utf-8")
+    evidence.write_evidence(
+        checklist_id="3.5", source_type="graph_api",
+        source_ref=f"graph:inactive-accounts:{now_iso}",
+        raw_bytes=body_35, artefact_date=now_iso,
+        parsed_summary={"total": len(db.fetch_accounts()),
+                        "inactive_over_90d": len(inactive)},
+        parser_name="graph_inactive_v1",
+        verdict="pass" if len(inactive) == 0 else "fail",
     )
 
-    # 3.4 (LAPS) en 7.2 (Office-macros) worden in v0.1 via CSV-upload gevuld
-    # (Intune-export). Hier niet overschrijven als de waarde al bestaat.
+    # 4.3 — Risky sign-ins laatste 7d
+    try:
+        risky = fetch_risky_signins(window_days=7)
+    except httpx.HTTPError as e:
+        print(f"  waarschuwing: risky sign-ins: {e}")
+        risky = []
+    body_43 = json.dumps(risky, sort_keys=True, default=str).encode("utf-8")
+    evidence.write_evidence(
+        checklist_id="4.3", source_type="graph_api",
+        source_ref=f"graph:risky-signins:{now_iso}",
+        raw_bytes=body_43, artefact_date=now_iso,
+        parsed_summary={"risky_count": len(risky), "window_days": 7},
+        parser_name="graph_risky_signins_v1",
+        verdict="pass" if len(risky) == 0 else "fail",
+    )
+
+    # 8.1 — Phishing-resistant MFA onder admins
+    resistant = 0
+    total_admins = len(privileged)
+    for uid in user_ids:
+        try:
+            methods = fetch_auth_methods(uid)
+        except httpx.HTTPError:
+            continue
+        if any(m.get("@odata.type") in PHISHING_RESISTANT_TYPES for m in methods):
+            resistant += 1
+    body_81 = json.dumps({"admins": total_admins, "resistant": resistant},
+                         sort_keys=True).encode("utf-8")
+    evidence.write_evidence(
+        checklist_id="8.1", source_type="graph_api",
+        source_ref=f"graph:authmethods-admins:{now_iso}",
+        raw_bytes=body_81, artefact_date=now_iso,
+        parsed_summary={"total": total_admins, "covered": resistant,
+                        "pct": round(resistant/total_admins*100) if total_admins else 0},
+        parser_name="graph_phishing_resistant_v1",
+        verdict="pass" if total_admins and resistant == total_admins else "fail",
+    )
+
+    print("Klaar.")
 
 
 if __name__ == "__main__":

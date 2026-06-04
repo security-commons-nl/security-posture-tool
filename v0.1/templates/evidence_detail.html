@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Evidence — {{ checklist_id }}</h1>
+<p><strong>{{ label }}</strong></p>
+<p>Doel: {{ target }}</p>
+<p><a href="/checklist">← terug naar checklist</a></p>
+
+{% if rows %}
+<table>
+  <thead>
+    <tr>
+      <th>Verdict</th>
+      <th>Geladen op</th>
+      <th>Artefact-datum</th>
+      <th>Bron-type</th>
+      <th>Bron-ref</th>
+      <th>Parser</th>
+      <th>SHA-256</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for r in rows %}
+    <tr>
+      <td><span class="verdict {{ r.verdict }}">{{ r.verdict }}</span></td>
+      <td>{{ r.collected_at }}</td>
+      <td>{{ r.artefact_date or "—" }}</td>
+      <td><code>{{ r.source_type }}</code></td>
+      <td><code>{{ r.source_ref }}</code></td>
+      <td><code>{{ r.parser_name or "—" }}</code></td>
+      <td><code title="{{ r.sha256 }}">{{ r.sha256[:12] }}…</code></td>
+    </tr>
+    {% if r.summary_parsed %}
+    <tr>
+      <td colspan="7">
+        <pre class="summary">{{ r.summary_parsed | tojson(indent=2) }}</pre>
+      </td>
+    </tr>
+    {% endif %}
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">Geen evidence-rijen voor {{ checklist_id }} — er is nog niets ingeladen.</p>
+{% endif %}
+{% endblock %}
