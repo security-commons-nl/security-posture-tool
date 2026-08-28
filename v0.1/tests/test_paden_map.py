@@ -14,7 +14,10 @@ def _bron() -> dict:
 
 
 def test_kopie_paden_json_matcht_hash():
-    h = hashlib.sha256((V01 / "paden.json").read_bytes()).hexdigest()
+    # Hash over genormaliseerde inhoud: git checkt op Windows met CRLF uit en op Linux met LF,
+    # en de kopie hoort inhoudelijk gelijk te zijn, niet toevallig gelijk in regeleindes.
+    ruw = (V01 / "paden.json").read_bytes().replace(b"\r\n", b"\n")
+    h = hashlib.sha256(ruw).hexdigest()
     assert h == (V01 / "paden.sha256").read_text().strip(), (
         "paden.json loopt achter op de bron in de aanvalspaden-repo"
     )
