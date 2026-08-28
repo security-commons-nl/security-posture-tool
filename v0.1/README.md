@@ -6,6 +6,23 @@ Minimale tool die data uit Entra haalt, CSV-upload accepteert, en meetwaarden to
 
 Zie `docs/v0.1-mvp.md` (één niveau hoger) voor de scope, datamodel en acceptatie-criteria.
 
+## Relatie met de aanvalspaden-keten
+
+Deze meting is diepte 2 van [aanvalspaden](https://github.com/security-commons-nl/aanvalspaden): dezelfde
+achttien paden en chokepoints als de zelfcheck en de methode. Elk checklist-item draagt een `pad` en een
+`chokepoint` (de tabel staat in `paden_map.py`), zodat een meting hier het bewijs is voor een cel daar.
+Drie items blijven bewust ongekoppeld, met reden in `ONGEKOPPELD_MET_REDEN`: verantwoording en
+normconformiteit zijn geen barriere in een aanvalspad.
+
+`paden.json` is een kopie van de bron in de aanvalspaden-repo; `paden.sha256` bewaakt dat hij niet
+achterloopt. Loopt de test daarop rood, kopieer dan opnieuw:
+
+```bash
+cp ../../aanvalspaden/paden.json paden.json
+sha256sum paden.json | awk '{print $1}' > paden.sha256
+python -m pytest tests/test_paden_map.py -v
+```
+
 ## Lokaal draaien
 
 ### 1. Python-omgeving

@@ -239,6 +239,16 @@ ALL_ITEMS: list[dict] = [
 # Backwards-compat alias
 V0_1_ITEMS = ALL_ITEMS
 
+# Elk item draagt het aanvalspad en chokepoint waar het bewijs voor is (diepte 2 van de keten
+# aanvalspaden). De koppeling staat in paden_map.py, zodat er maar een plek is om bij te werken;
+# hier komen alleen de velden op de items te staan. None betekent: dit item hoort bij geen pad.
+from paden_map import koppel as _koppel
+
+for _item in ALL_ITEMS:
+    _pad, _cp = _koppel(_item["id"]) or (None, None)
+    _item["pad"], _item["chokepoint"] = _pad, _cp
+del _item, _pad, _cp
+
 
 def label_for(checklist_id: str) -> str:
     for it in ALL_ITEMS:
@@ -266,6 +276,22 @@ def phases_for(checklist_id: str) -> list[str]:
         if it["id"] == checklist_id:
             return list(it.get("kill_chain_phases") or [])
     return []
+
+
+def pad_for(checklist_id: str) -> str | None:
+    """Het aanvalspad waar dit item bewijs voor levert, of None."""
+    for it in ALL_ITEMS:
+        if it["id"] == checklist_id:
+            return it.get("pad")
+    return None
+
+
+def chokepoint_for(checklist_id: str) -> str | None:
+    """Het chokepoint waar dit item bewijs voor levert, of None."""
+    for it in ALL_ITEMS:
+        if it["id"] == checklist_id:
+            return it.get("chokepoint")
+    return None
 
 
 def seed_if_empty():
