@@ -122,9 +122,9 @@ def _phase_counters(items: list[dict]) -> list[dict]:
 def index(request: Request):
     items = _enriched_checklist()
     return templates.TemplateResponse(
+        request,
         "index.html",
         {
-            "request": request,
             "checklist": items,
             "categories": _category_counters(items),
             "phases": _phase_counters(items),
@@ -139,8 +139,9 @@ def index(request: Request):
 def checklist_page(request: Request):
     items = _enriched_checklist()
     return templates.TemplateResponse(
+        request,
         "checklist.html",
-        {"request": request, "checklist": items,
+        {"checklist": items,
          "categories": _category_counters(items),
          "phases": _phase_counters(items)},
     )
@@ -161,8 +162,9 @@ def evidence_page(request: Request, checklist_id: str):
     label = checklist.label_for(checklist_id)
     target = checklist.target_for(checklist_id)
     return templates.TemplateResponse(
+        request,
         "evidence_detail.html",
-        {"request": request, "checklist_id": checklist_id,
+        {"checklist_id": checklist_id,
          "label": label, "target": target, "rows": rows},
     )
 
@@ -170,38 +172,41 @@ def evidence_page(request: Request, checklist_id: str):
 @app.get("/mfa", response_class=HTMLResponse)
 def mfa_page(request: Request):
     return templates.TemplateResponse(
+        request,
         "mfa.html",
-        {"request": request, "accounts": db.fetch_accounts(privileged_only=True)},
+        {"accounts": db.fetch_accounts(privileged_only=True)},
     )
 
 
 @app.get("/inactive", response_class=HTMLResponse)
 def inactive_page(request: Request):
     return templates.TemplateResponse(
+        request,
         "inactive.html",
-        {"request": request, "accounts": db.fetch_inactive_accounts(90)},
+        {"accounts": db.fetch_inactive_accounts(90)},
     )
 
 
 @app.get("/crown-jewels", response_class=HTMLResponse)
 def crown_jewels_page(request: Request):
     return templates.TemplateResponse(
+        request,
         "crown_jewels.html",
-        {"request": request, "items": db.fetch_crown_jewels()},
+        {"items": db.fetch_crown_jewels()},
     )
 
 
 @app.get("/uploads", response_class=HTMLResponse)
 def uploads_page(request: Request):
-    return templates.TemplateResponse("uploads.html", {"request": request})
+    return templates.TemplateResponse(request, "uploads.html")
 
 
 @app.get("/drops", response_class=HTMLResponse)
 def drops_page(request: Request):
     return templates.TemplateResponse(
+        request,
         "drops.html",
         {
-            "request": request,
             "files": drops.list_drops(),
             "drops_path": str(drops._drops_path()),
         },
@@ -217,6 +222,7 @@ def drops_view(request: Request, path: str):
     if result is None:
         raise HTTPException(404, "Bestand niet gevonden")
     return templates.TemplateResponse(
+        request,
         "drop_detail.html",
         {"request": request, "file": result, "path": path},
     )
