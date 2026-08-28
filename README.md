@@ -27,10 +27,12 @@ Drie fundamentele pijlers:
 
 ## Beginnen — v0.1 MVP
 
-De hierboven beschreven pijlers zijn de *horizon*, niet de startlijn. Om direct met data verzamelen aan de slag te kunnen, bevat de repo een **v0.1**-skelet: één Entra-connector, SQLite, mini FastAPI-webpagina, CSV-upload voor handmatige data. Geen AI, geen D3-fan, geen YAML-framework — eerst waarde, dan complexiteit.
+De hierboven beschreven pijlers zijn de *horizon*, niet de startlijn. Wat er nu draait, staat in `v0.1/`: een FastAPI-webpagina op SQLite, een Entra-connector en ruim twintig parsers voor exports die je al hebt (nmap, Nessus, Fortigate, Palo Alto, GPO, LAPS, SIEM-regels, back-uprapporten), met een testsuite van 127 tests. Geen AI, geen D3, geen YAML-framework: eerst waarde, dan complexiteit.
+
+**Let op de mappen:** `backend/`, `frontend/` en `controls/` hierboven beschrijven de doelarchitectuur en zijn nog leeg. Alles wat werkt, zit in `v0.1/`.
 
 - **Scope, datamodel, acceptatie-criteria:** `docs/v0.1-mvp.md`
-- **Code-skelet:** `v0.1/` — zie de README daarin om lokaal te draaien
+- **Werkende code:** `v0.1/` — zie de README daarin om lokaal te draaien
 - **Meet-subset:** vijf items uit Week 1 van een cyber-hygiene-checklist voor gemeenten (3.1 MFA, 3.4 LAPS, 3.5 inactieve accounts, 7.2 ASR, 1.1 kroonjuwelen)
 
 De volwassen architectuur in `docs/architecture.md` en `docs/overview.html` komt stapsgewijs, op basis van werkelijk gebruik.

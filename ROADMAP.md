@@ -1,6 +1,10 @@
 # ROADMAP
 
-## Fase 1 — Architectuur & MVP (Nu bezig)
+> **Status: prototype** (redactiestatuut B8): het werkt en is te draaien, zonder belofte over
+> volledigheid of onderhoud. De vinkjes hieronder slaan op `v0.1/`; de doelarchitectuur in
+> `docs/architecture.md` is de horizon, niet de huidige staat.
+
+## Fase 1 — Architectuur & MVP (deels opgeleverd in `v0.1/`)
 - [x] Initialisatie Defense in Depth (DiD) lagen diagram visualisatiestructuur.
 - [x] Uitwerking evidence-based theorie (`docs/defense-in-depth-research.md`).
 - [x] Architectuur vastgelegd en domeinmodel afgebakend (`Evidence → Observation → Finding`).
@@ -10,7 +14,7 @@
 
 ## Fase 2 — Data Engine (Q3 2026)
 - [ ] **Analysis Engine**: Verwerking van Observations naar Findings op basis van de YAML-checks in `controls/`. 
-- [ ] **Eerste Connectors**: `entra_id` (MFA/LAPS API status) en `nmap` (XML parser).
+- [x] **Eerste Connectors**: `entra_id` (MFA/LAPS API status) en `nmap` (XML parser); inmiddels ruim twintig parsers in `v0.1/connectors/`.
 - [ ] **Automated Prioritization**: Opleveren van de dynamische herberekenbare formule (Criticality x Severity x Exploitability).
 
 ## Fase 3 — AI & Integratie (Q4 2026)
