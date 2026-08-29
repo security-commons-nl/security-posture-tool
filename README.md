@@ -1,14 +1,35 @@
-# Security Posture Tool
+# security-posture-tool
+
+Evidence-based security posture registratie voor interventieteams, en diepte 2 van de aanvalspaden-keten.
+
+Status: prototype. Werkt en heeft groene tests; geen product.
 
 **Operationele, evidence-based security posture registratie voor interventieteams.**
 
 > Geen audit-wizards ("Heb je een firewall? [x] Ja").
 > Wel operationeel inzicht ("Hier is bewijs van NMAP en Entra; uit 14.000 logs blijken nú 3 gapende gaten in je Perimeter en IAM.")
 
-
 [![Bijdragen](https://img.shields.io/badge/📝_Bijdragen-238636?style=for-the-badge)](../../issues/new/choose)&nbsp;&nbsp;&nbsp;&nbsp;[![Meepraten](https://img.shields.io/badge/💬_Meepraten-0969da?style=for-the-badge)](../../discussions)
 
-👉 **Iets delen, feedback geven of een vraag stellen?** Klik op een van de knoppen hierboven — geen Git-ervaring nodig. Zie [CONTRIBUTING.md](CONTRIBUTING.md) voor meer opties.
+👉 **Iets delen, feedback geven of een vraag stellen?** Klik op een van de knoppen hierboven - geen Git-ervaring nodig. Zie [CONTRIBUTING.md](CONTRIBUTING.md) voor meer opties.
+
+## Voor wie
+
+Blue teams en interventieteams.
+
+## Snel starten
+
+Beginnen
+
+## Bijdragen
+
+Zie de [CONTRIBUTING](https://github.com/security-commons-nl/.github/blob/main/CONTRIBUTING.md) van de organisatie: daar staat per project een formulier, ook zonder Git-ervaring.
+
+Zie [CONTRIBUTING.md](CONTRIBUTING.md) voor hoe je iets kan delen, melden of verbeteren - met of zonder Git-ervaring.
+
+## Licentie
+
+EUPL-1.2, zie [LICENSE](LICENSE).
 
 ## Wat is dit?
 Een open-source operationele applicatie ontworpen voor het blauwe team of interventieteams die snel tot de kern moeten komen. Waar trajecten zoals BIO, ISO of NIS2 vaak leiden tot theoretische compliance, maakt deze tool de *daadwerkelijke* technische werkelijkheid inzichtelijk per verdedigingslaag (Defense-in-Depth).
@@ -25,21 +46,16 @@ Drie fundamentele pijlers:
 - `docs/` - Architectuur blauwdruk, domeinmodel en design.
 - `runbooks/` - Markdown gedreven documenten die teams stap-voor-stap vertellen hoe ze lokaal data moeten winnen.
 
-## Beginnen — v0.1 MVP
-
+## Beginnen - v0.1 MVP
 De hierboven beschreven pijlers zijn de *horizon*, niet de startlijn. Wat er nu draait, staat in `v0.1/`: een FastAPI-webpagina op SQLite, een Entra-connector en ruim twintig parsers voor exports die je al hebt (nmap, Nessus, Fortigate, Palo Alto, GPO, LAPS, SIEM-regels, back-uprapporten), met een testsuite van 127 tests. Geen AI, geen D3, geen YAML-framework: eerst waarde, dan complexiteit.
 
 **Let op de mappen:** `backend/`, `frontend/` en `controls/` hierboven beschrijven de doelarchitectuur en zijn nog leeg. Alles wat werkt, zit in `v0.1/`.
 
 - **Scope, datamodel, acceptatie-criteria:** `docs/v0.1-mvp.md`
-- **Werkende code:** `v0.1/` — zie de README daarin om lokaal te draaien
+- **Werkende code:** `v0.1/` - zie de README daarin om lokaal te draaien
 - **Meet-subset:** vijf items uit Week 1 van een cyber-hygiene-checklist voor gemeenten (3.1 MFA, 3.4 LAPS, 3.5 inactieve accounts, 7.2 ASR, 1.1 kroonjuwelen)
 
 De volwassen architectuur in `docs/architecture.md` en `docs/overview.html` komt stapsgewijs, op basis van werkelijk gebruik.
 
 ## Relatie met Bestuur & Compliance
 Voor beleid, risicomanagement en bestuurlijke compliance-rapportage is nadrukkelijk het afzonderlijke `grc-platform` bedoeld. Deze tool is bedoeld voor *handelen* in de operatie.
-
-## Bijdragen
-
-Zie [CONTRIBUTING.md](CONTRIBUTING.md) voor hoe je iets kan delen, melden of verbeteren — met of zonder Git-ervaring.
