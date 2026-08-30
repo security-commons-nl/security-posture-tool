@@ -2,6 +2,10 @@ version: 2
 updates:
   # Python dependencies in v0.1/
   - package-ecosystem: "pip"
+    groups:
+      python:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
     directory: "/v0.1"
     schedule:
       interval: "weekly"
