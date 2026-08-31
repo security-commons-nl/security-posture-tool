@@ -9,5 +9,5 @@ pypdf>=4.0
 # dev / tests
 pytest>=7.4
 pytest-asyncio>=0.21
-requests-mock>=1.11
+requests-mock>=1.12.1
 fpdf2>=2.7
