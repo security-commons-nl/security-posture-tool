@@ -5,7 +5,7 @@ python-multipart>=0.0.32
 python-dotenv>=1.0
 httpx>=0.28.1
 msal>=1.38.0
-pypdf>=4.0
+pypdf>=6.16.2
 # dev / tests
 pytest>=7.4
 pytest-asyncio>=0.21
