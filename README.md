@@ -58,4 +58,4 @@ De hierboven beschreven pijlers zijn de *horizon*, niet de startlijn. Wat er nu 
 De volwassen architectuur in `docs/architecture.md` en `docs/overview.html` komt stapsgewijs, op basis van werkelijk gebruik.
 
 ## Relatie met Bestuur & Compliance
-Voor beleid, risicomanagement en bestuurlijke compliance-rapportage is nadrukkelijk het afzonderlijke `grc-platform` bedoeld. Deze tool is bedoeld voor *handelen* in de operatie.
+Beleid, risicomanagement en bestuurlijke compliance-rapportage horen in het managementsysteem van de eigen organisatie; deze tool levert daar bevindingen voor aan en is bedoeld voor *handelen* in de operatie.
