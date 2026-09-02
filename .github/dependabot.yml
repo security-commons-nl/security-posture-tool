@@ -16,7 +16,18 @@ updates:
     labels:
       - "dependencies"
 
-  # github-actions ecosysteem weggelaten: deze repo heeft (nog) geen
-  # .github/workflows/-map, dus dependabot had niets om bij te werken
-  # en genereerde spurious 'failure' runs. Aanzetten zodra er een workflow
-  # wordt toegevoegd.
+  # Er zijn inmiddels workflows, dus github-actions doet weer mee. De reden om het
+  # eerder weg te laten (geen workflows, dus spurious failure-runs) geldt niet meer.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    groups:
+      actions:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "ci"
+    labels: ["dependencies", "ci"]
