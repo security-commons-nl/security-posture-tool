@@ -1,5 +1,16 @@
 # security-posture-tool
 
+> **Gearchiveerd op 03-09-2026. Opgegaan in [aanvalspaden/meting](https://security-commons-nl.github.io/aanvalspaden/meting/).**
+>
+> De 37 checklistitems, de 27 connectors en hun drempels zijn overgenomen op tag `v0-applicatie` en
+> staan nu als data in [`meting/regels.json`](https://github.com/security-commons-nl/aanvalspaden/blob/main/meting/regels.json),
+> met een referentie in `meting/reken.py` en dezelfde toetsen in de browser. Dit was een applicatie
+> met een installatie en een eigen kopie van `paden.json`; de commons publiceert instrumenten, en de
+> meting is er een: een pagina die je opent, die je exports in je eigen browser leest.
+>
+> Deze repo blijft leesbaar staan als herkomst. De tag `v0-applicatie` is bevroren: `meting/overname.py`
+> leest hem, en wie hem verplaatst, verandert de bron onder het instrument vandaan.
+
 Evidence-based security posture registratie voor interventieteams, en diepte 2 van de aanvalspaden-keten.
 
 Status: prototype. Werkt en heeft groene tests; geen product.
